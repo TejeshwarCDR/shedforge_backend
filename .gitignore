@@ -1,0 +1,28 @@
+# Python cache
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Virtual env
+.venv/
+venv/
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# Local database/artifacts
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime/generated data
+.generation_jobs_store*.json
+.ga_hyperparameter_cache.json
+perf-results/
+database/backups/
+
+# Test artifacts
+.coverage
+htmlcov/
