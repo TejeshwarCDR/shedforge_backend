@@ -50,6 +50,16 @@ async def app_error_handler(request: Request, exc: AppError):
 app = FastAPI(title=settings.project_name, lifespan=lifespan)
 app.add_exception_handler(AppError, app_error_handler)
 
+
+@app.get("/")
+def root() -> dict[str, str]:
+    return {"message": "ShedForge backend is running"}
+
+
+@app.get("/health")
+def root_health() -> dict[str, str]:
+    return {"status": "ok"}
+
 app.add_middleware(RequestSizeLimitMiddleware, max_bytes=settings.max_request_size_bytes)
 app.add_middleware(SecurityHeadersMiddleware, settings=settings)
 
