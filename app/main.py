@@ -33,7 +33,17 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    ensure_runtime_schema_compatibility()
+    import logging
+
+    logger = logging.getLogger("uvicorn.error")
+    if settings.skip_runtime_schema_bootstrap:
+        logger.warning("Skipping runtime schema compatibility bootstrap because SKIP_RUNTIME_SCHEMA_BOOTSTRAP=true")
+    else:
+        try:
+            ensure_runtime_schema_compatibility()
+        except Exception as e:
+            logger.error(f"\n🚨 DATABASE CONNECTION FAILED: {e}")
+            logger.error("The application started, but many features will fail until Supabase is reachable.\n")
     yield
 
 

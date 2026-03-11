@@ -660,6 +660,57 @@ def test_generate_filters_out_hard_conflict_alternatives(client, monkeypatch):
     assert payload["alternatives"][0]["rank"] == 1
 
 
+def test_generate_reloads_user_after_session_reset(client, monkeypatch):
+    admin_payload = {
+        "name": "Admin Detached User",
+        "email": "admin-detached-user@example.com",
+        "password": "password123",
+        "role": "admin",
+        "department": "Administration",
+    }
+    register_user(client, admin_payload)
+    admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+
+    def fake_run_generation(*, db, settings, payload, reserved_resource_slots=None):
+        return GenerateTimetableResponse(
+            alternatives=[
+                GeneratedAlternative(
+                    rank=1,
+                    fitness=100.0,
+                    hard_conflicts=0,
+                    soft_penalty=0.0,
+                    payload=OfficialTimetablePayload(
+                        programId=payload.program_id,
+                        termNumber=payload.term_number,
+                        facultyData=[],
+                        courseData=[],
+                        roomData=[],
+                        timetableData=[],
+                    ),
+                )
+            ],
+            settings_used=GenerationSettingsBase(),
+            runtime_ms=1,
+        )
+
+    monkeypatch.setattr("app.api.routes.generator._run_generation", fake_run_generation)
+
+    response = client.post(
+        "/api/timetable/generate",
+        json={
+            "program_id": "program-detached-user",
+            "term_number": 1,
+            "alternative_count": 1,
+            "persist_official": False,
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["alternatives"]
+    assert payload["auto_saved_version_label"]
+
+
 def test_cycle_generation_retries_without_reserved_slots_when_strict_mode_is_infeasible(client, monkeypatch):
     admin_payload = {
         "name": "Admin User",
@@ -769,6 +820,144 @@ def test_cycle_generation_retries_without_reserved_slots_when_strict_mode_is_inf
     assert len(payload["results"]) == 2
     assert (3, True) in calls
     assert (3, False) in calls
+
+
+def test_cycle_generation_reloads_faculty_after_session_reset(client, monkeypatch):
+    admin_payload = {
+        "name": "Admin Detached Faculty",
+        "email": "admin-detached-faculty@example.com",
+        "password": "password123",
+        "role": "admin",
+        "department": "Administration",
+    }
+    register_user(client, admin_payload)
+    admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+
+    program_response = client.post(
+        "/api/programs",
+        json={
+            "name": "Detached Program",
+            "code": "DET",
+            "department": "CSE",
+            "degree": "BS",
+            "duration_years": 4,
+            "sections": 1,
+            "total_students": 60,
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert program_response.status_code == 201
+    program_id = program_response.json()["id"]
+
+    faculty_response = client.post(
+        "/api/faculty",
+        json={
+            "program_id": program_id,
+            "name": "Cycle Faculty",
+            "designation": "Assistant Professor",
+            "email": "cycle-faculty@example.com",
+            "department": "CSE",
+            "workload_hours": 4,
+            "max_hours": 20,
+            "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "availability_windows": [],
+            "avoid_back_to_back": False,
+            "preferred_min_break_minutes": 0,
+            "preference_notes": None,
+            "preferred_subject_codes": [],
+            "semester_preferences": {},
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert faculty_response.status_code == 201
+    faculty_id = faculty_response.json()["id"]
+
+    monkeypatch.setattr(
+        "app.api.routes.generator._resolve_cycle_term_numbers",
+        lambda **kwargs: [1],
+    )
+
+    def fake_run_generation(*, db, settings, payload, reserved_resource_slots=None):
+        return GenerateTimetableResponse(
+            alternatives=[
+                GeneratedAlternative(
+                    rank=1,
+                    fitness=50.0,
+                    hard_conflicts=0,
+                    soft_penalty=0.0,
+                    payload=OfficialTimetablePayload(
+                        programId=payload.program_id,
+                        termNumber=payload.term_number,
+                        facultyData=[
+                            {
+                                "id": faculty_id,
+                                "name": "Cycle Faculty",
+                                "department": "CSE",
+                                "workloadHours": 4,
+                                "maxHours": 20,
+                                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                                "email": "cycle-faculty@example.com",
+                                "currentWorkload": 0,
+                            }
+                        ],
+                        courseData=[
+                            {
+                                "id": "course-cycle-1",
+                                "code": "DET101",
+                                "name": "Detached Systems",
+                                "type": "theory",
+                                "credits": 1,
+                                "facultyId": faculty_id,
+                                "duration": 1,
+                                "hoursPerWeek": 1,
+                            }
+                        ],
+                        roomData=[
+                            {
+                                "id": "room-cycle-1",
+                                "name": "R1",
+                                "capacity": 60,
+                                "type": "lecture",
+                                "building": "Main",
+                            }
+                        ],
+                        timetableData=[
+                            {
+                                "id": "slot-cycle-1",
+                                "day": "Monday",
+                                "startTime": "08:50",
+                                "endTime": "09:40",
+                                "courseId": "course-cycle-1",
+                                "facultyId": faculty_id,
+                                "roomId": "room-cycle-1",
+                                "section": "A",
+                                "studentCount": 40,
+                            }
+                        ],
+                    ),
+                )
+            ],
+            settings_used=GenerationSettingsBase(),
+            runtime_ms=1,
+        )
+
+    monkeypatch.setattr("app.api.routes.generator._run_generation", fake_run_generation)
+
+    response = client.post(
+        "/api/timetable/generate-cycle",
+        json={
+            "program_id": program_id,
+            "cycle": "odd",
+            "alternative_count": 1,
+            "persist_official": False,
+        },
+        headers={"Authorization": f"Bearer {admin_token}"},
+    )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["results"]
+    assert payload["pareto_front"]
+    assert payload["pareto_front"][0]["workload_gap_penalty"] >= 0
 
 
 def test_generate_skips_publish_and_returns_warning_when_conflicts_remain(client, monkeypatch):

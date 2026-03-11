@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.user import UserRole
 
 
 class UserBase(BaseModel):
     name: str = Field(min_length=1, max_length=200)
-    email: EmailStr
+    email: str
     role: UserRole
     program_id: str | None = Field(default=None, min_length=1, max_length=36)
     department: str | None = None
@@ -91,7 +91,7 @@ class UserCreate(UserBase):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    email: str
     password: str = Field(min_length=8, max_length=128)
     role: UserRole | None = None
 
@@ -107,7 +107,7 @@ class LoginOtpRequest(UserLogin):
 
 class LoginOtpChallengeOut(BaseModel):
     challenge_id: str
-    email: EmailStr
+    email: str
     expires_in_seconds: int = Field(ge=1)
     message: str
     otp_hint: str | None = None
@@ -127,7 +127,7 @@ class UserOut(UserBase):
 class StudentListOut(BaseModel):
     id: str
     name: str
-    email: EmailStr
+    email: str
     program_id: str | None = None
     department: str | None = None
     section_name: str | None = None
@@ -142,7 +142,7 @@ class StudentListOut(BaseModel):
 
 class StudentCreate(BaseModel):
     name: str = Field(min_length=1, max_length=200)
-    email: EmailStr
+    email: str
     password: str = Field(min_length=8, max_length=128)
     program_id: str | None = Field(default=None, min_length=1, max_length=36)
     department: str | None = Field(default=None, min_length=1, max_length=200)
@@ -192,7 +192,7 @@ class StudentCreate(BaseModel):
 
 class StudentUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=200)
-    email: EmailStr | None = None
+    email: str | None = None
     program_id: str | None = Field(default=None, min_length=1, max_length=36)
     department: str | None = Field(default=None, min_length=1, max_length=200)
     section_name: str | None = Field(default=None, min_length=1, max_length=50)

@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
 
     database_url: str = "postgresql+psycopg://postgres:postgres@localhost:5432/shedforge"
+    skip_runtime_schema_bootstrap: bool = False
 
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"

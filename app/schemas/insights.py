@@ -15,7 +15,12 @@ class TimetableConflict(BaseModel):
         "section-overlap",
         "elective-overlap",
         "capacity",
+        "room-type",
         "availability",
+        "working-hours",
+        "course-duration",
+        "practical-block",
+        "workload-overflow",
         "course-faculty-inconsistency",
     ]
     severity: Literal["high", "medium", "low"]

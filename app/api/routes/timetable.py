@@ -305,6 +305,43 @@ def _slot_semester_section_label(
     return f"Semester {semester} Section {section}"
 
 
+def _slot_time_window_label(slot: object) -> str:
+    return (
+        f"{getattr(slot, 'day', '?')} "
+        f"{getattr(slot, 'startTime', '??:??')}-{getattr(slot, 'endTime', '??:??')}"
+    )
+
+
+def _slot_course_label(slot: object, course_map: dict[str, object]) -> str:
+    course = course_map.get(getattr(slot, "courseId", None))
+    if course is None:
+        return str(getattr(slot, "courseId", "") or "Unknown course")
+    code = str(getattr(course, "code", "") or "").strip()
+    name = str(getattr(course, "name", "") or "").strip()
+    # Conflict UI should be plain-language. Prefer the course name and avoid
+    # showing internal IDs or opaque codes when a name is available.
+    return name or code or str(getattr(slot, "courseId", "") or "Unknown course")
+
+
+def _slot_context_label(
+    *,
+    slot: object,
+    course_map: dict[str, object],
+    fallback_term_number: int | None,
+) -> str:
+    scope = _slot_semester_section_label(
+        slot=slot,
+        course_map=course_map,
+        fallback_term_number=fallback_term_number,
+    )
+    batch = str(getattr(slot, "batch", "") or "").strip()
+    batch_suffix = f", Batch {batch}" if batch else ""
+    return (
+        f"{_slot_course_label(slot, course_map)} for {scope}{batch_suffix} "
+        f"on {_slot_time_window_label(slot)}"
+    )
+
+
 def _course_computed_credits(course: object) -> float:
     theory = int(getattr(course, "theory_hours", getattr(course, "theoryHours", 0)) or 0)
     tutorial = int(getattr(course, "tutorial_hours", getattr(course, "tutorialHours", 0)) or 0)
@@ -1608,30 +1645,36 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                     other_end=other_end,
                     shared_groups_by_course=shared_groups_by_course,
                 )
+                slot_scope = _slot_context_label(
+                    slot=slot,
+                    course_map=course_map,
+                    fallback_term_number=payload.term_number,
+                )
+                other_scope = _slot_context_label(
+                    slot=other,
+                    course_map=course_map,
+                    fallback_term_number=payload.term_number,
+                )
 
                 if slot.roomId == other.roomId and not allow_shared_lecture:
                     conflict_key = ("room-overlap", slot_pair[0], slot_pair[1])
                     if conflict_key not in seen_pairs:
                         seen_pairs.add(conflict_key)
                         room_name = room_map.get(slot.roomId).name if slot.roomId in room_map else slot.roomId
-                        slot_scope = _slot_semester_section_label(
-                            slot=slot,
-                            course_map=course_map,
-                            fallback_term_number=payload.term_number,
-                        )
-                        other_scope = _slot_semester_section_label(
-                            slot=other,
-                            course_map=course_map,
-                            fallback_term_number=payload.term_number,
-                        )
                         conflicts.append(
                             TimetableConflict(
                                 id=f"room-{slot_pair[0]}-{slot_pair[1]}",
                                 type="room-overlap",
                                 severity="high",
-                                description=f"Room {room_name} is double-booked on {day} ({slot_scope} and {other_scope}).",
+                                description=(
+                                    f"Room {room_name} is double-booked on {day}. "
+                                    f"Both {slot_scope} and {other_scope} use the same room at overlapping times."
+                                ),
                                 affectedSlots=list(slot_pair),
-                                resolution="Move one class to another room or non-overlapping time slot.",
+                                resolution=(
+                                    f"Keep {room_name} assigned to only one class in this time window. "
+                                    "Move one class to another compatible room or a non-overlapping slot."
+                                ),
                             )
                         )
 
@@ -1650,35 +1693,40 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                     conflict_key = ("faculty-overlap", slot_pair[0], slot_pair[1])
                     if conflict_key not in seen_pairs:
                         seen_pairs.add(conflict_key)
-                        faculty_name = ", ".join(
-                            (
-                                faculty_map.get(faculty_id).name
-                                if faculty_id in faculty_map and faculty_map.get(faculty_id) is not None
-                                else faculty_id
-                            )
-                            for faculty_id in overlapping_faculty_ids
-                        )
-                        slot_scope = _slot_semester_section_label(
-                            slot=slot,
-                            course_map=course_map,
-                            fallback_term_number=payload.term_number,
-                        )
-                        other_scope = _slot_semester_section_label(
-                            slot=other,
-                            course_map=course_map,
-                            fallback_term_number=payload.term_number,
-                        )
+                        
+                        descriptions = []
+                        for faculty_id in overlapping_faculty_ids:
+                            faculty_obj = faculty_map.get(faculty_id)
+                            fac_name = faculty_obj.name if faculty_obj is not None else faculty_id
+                            
+                            slot_role = "assistant" if faculty_id in _slot_assistant_faculty_ids(slot) else "primary"
+                            other_role = "assistant" if faculty_id in _slot_assistant_faculty_ids(other) else "primary"
+                            
+                            if slot_role == other_role:
+                                role_desc = f"as {slot_role} faculty for both"
+                            else:
+                                role_desc = (
+                                    f"as {slot_role} faculty for {_slot_course_label(slot, course_map)} "
+                                    f"and {other_role} faculty for {_slot_course_label(other, course_map)}"
+                                )
+                                
+                            descriptions.append(f"{fac_name} is scheduled {role_desc} at the same time ({slot_scope} vs {other_scope}).")
+                            
+                        final_description = " ".join(descriptions)
+                        
                         conflicts.append(
                             TimetableConflict(
                                 id=f"faculty-{slot_pair[0]}-{slot_pair[1]}",
                                 type="faculty-overlap",
                                 severity="high",
-                                description=(
-                                    f"{faculty_name} is assigned to overlapping sessions on {day} "
-                                    f"({slot_scope} and {other_scope})."
-                                ),
+                                description=final_description,
                                 affectedSlots=list(slot_pair),
-                                resolution="Reassign one session to another faculty member or time slot.",
+                                resolution=(
+                                    "Keep each faculty member free for only one class in the same time window. "
+                                    f"Reassign {_slot_course_label(slot, course_map)} or {_slot_course_label(other, course_map)} "
+                                    "to another available faculty member "
+                                    "or move one of the classes."
+                                ),
                             )
                         )
 
@@ -1723,10 +1771,15 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                                     type="section-overlap",
                                     severity="high",
                                     description=(
-                                        f"Section {slot.section} ({semester_label}) has overlapping classes on {day}."
+                                        f"Students in Section {slot.section} ({semester_label}) are double-booked on {day}. "
+                                        f"{_slot_course_label(slot, course_map)} and {_slot_course_label(other, course_map)} "
+                                        "overlap, so the same students cannot attend both."
                                     ),
                                     affectedSlots=list(slot_pair),
-                                    resolution="Move one class so section sessions do not overlap.",
+                                    resolution=(
+                                        f"Move one of the overlapping classes for Section {slot.section} "
+                                        "to a different teaching block so students can attend both."
+                                    ),
                                 )
                             )
 
@@ -1761,13 +1814,13 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                                     type="elective-overlap",
                                     severity="medium",
                                     description=(
-                                        f"Elective courses {slot.courseId} and {other.courseId} overlap on {day} "
-                                        "for a configured elective group."
+                                        f"Configured elective options {_slot_course_label(slot, course_map)} and "
+                                        f"{_slot_course_label(other, course_map)} overlap on {day}. "
+                                        "Eligible students may be forced to miss one option."
                                     ),
                                     affectedSlots=list(slot_pair),
                                     resolution=(
-                                        "Move one elective to a different time slot to avoid overlap "
-                                        "for eligible student groups."
+                                        "Move one elective to a different teaching block so students can choose either option."
                                     ),
                                 )
                             )
@@ -1824,13 +1877,133 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                         type="capacity",
                         severity="medium",
                         description=(
-                            f"Room {room.name} capacity ({room.capacity}) is below "
-                            f"student count ({slot.studentCount}) for slot {slot.id}."
+                            f"The assigned room {room.name} cannot accommodate all students. "
+                            f"It has a capacity of {room.capacity}, but {slot.studentCount} students are scheduled for "
+                            f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)}."
                         ),
                         affectedSlots=[slot.id],
-                        resolution="Assign a larger room or reduce section/batch size for this slot.",
+                        resolution=(
+                            f"Assign a compatible room with capacity {slot.studentCount}+ "
+                            "or split/rebalance the affected student group."
+                        ),
                     )
                 )
+        course = course_map.get(slot.courseId)
+        if room is not None and course is not None and not _room_matches_course_type(
+            room,
+            course,
+            session_type=getattr(slot, "sessionType", None),
+        ):
+            key = ("room-type", slot.id)
+            if key not in seen_single:
+                seen_single.add(key)
+                expected_room_label = "lab room" if _slot_is_practical(slot, course) else "non-lab room"
+                conflicts.append(
+                    TimetableConflict(
+                        id=f"room-type-{slot.id}",
+                        type="room-type",
+                        severity="high",
+                        description=(
+                            f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                            f"is assigned to room {room.name} ({room.type}), but it requires a {expected_room_label}."
+                        ),
+                        affectedSlots=[slot.id],
+                        resolution=f"Assign a compatible {expected_room_label} for this class.",
+                    )
+                )
+
+    if db is not None:
+        working_hours = load_working_hours(db)
+        schedule_policy = load_schedule_policy(db)
+        period_minutes = schedule_policy.period_minutes
+        for slot in payload.timetable_data:
+            key_prefix = f"working-hours-{slot.id}"
+            start = parse_time_to_minutes(slot.startTime)
+            end = parse_time_to_minutes(slot.endTime)
+            hours_entry = working_hours.get(slot.day)
+            if hours_entry is None or not hours_entry.enabled:
+                key = ("working-hours", key_prefix)
+                if key not in seen_single:
+                    seen_single.add(key)
+                    conflicts.append(
+                        TimetableConflict(
+                            id=f"{key_prefix}-disabled-day",
+                            type="working-hours",
+                            severity="high",
+                            description=(
+                                f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                                f"is placed on {slot.day}, which is not configured as a teaching day."
+                            ),
+                            affectedSlots=[slot.id],
+                            resolution="Move this class to an enabled teaching day and valid teaching block.",
+                        )
+                    )
+                continue
+
+            segments = build_teaching_segments(
+                day_start=parse_time_to_minutes(hours_entry.start_time),
+                day_end=parse_time_to_minutes(hours_entry.end_time),
+                period_minutes=period_minutes,
+                breaks=schedule_policy.breaks,
+            )
+            if not segments:
+                continue
+
+            allowed_start = min(segment_start for segment_start, _segment_end in segments)
+            allowed_end = max(segment_end for _segment_start, segment_end in segments)
+            if start < allowed_start or end > allowed_end:
+                key = ("working-hours", f"{key_prefix}-outside-window")
+                if key not in seen_single:
+                    seen_single.add(key)
+                    conflicts.append(
+                        TimetableConflict(
+                            id=f"{key_prefix}-outside-window",
+                            type="working-hours",
+                            severity="high",
+                            description=(
+                                f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                                f"falls outside configured working hours {hours_entry.start_time}-{hours_entry.end_time}."
+                            ),
+                            affectedSlots=[slot.id],
+                            resolution="Move this class fully inside configured working hours.",
+                        )
+                    )
+
+            if (end - start) % period_minutes != 0:
+                key = ("working-hours", f"{key_prefix}-duration")
+                if key not in seen_single:
+                    seen_single.add(key)
+                    conflicts.append(
+                        TimetableConflict(
+                            id=f"{key_prefix}-duration",
+                            type="working-hours",
+                            severity="high",
+                            description=(
+                                f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                                f"does not align to the configured period length of {period_minutes} minutes."
+                            ),
+                            affectedSlots=[slot.id],
+                            resolution=f"Resize or move this class so its duration is a multiple of {period_minutes} minutes.",
+                        )
+                    )
+
+            if not is_slot_aligned_with_segments(start, end, segments):
+                key = ("working-hours", f"{key_prefix}-alignment")
+                if key not in seen_single:
+                    seen_single.add(key)
+                    conflicts.append(
+                        TimetableConflict(
+                            id=f"{key_prefix}-alignment",
+                            type="working-hours",
+                            severity="high",
+                            description=(
+                                f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                                "does not start and end on configured teaching slot boundaries."
+                            ),
+                            affectedSlots=[slot.id],
+                            resolution="Move this class to a valid configured teaching block.",
+                        )
+                    )
 
     faculty_windows = {item.id: _availability_windows_by_day(getattr(item, "availability_windows", [])) for item in payload.faculty_data}
     room_windows = {item.id: _availability_windows_by_day(getattr(item, "availability_windows", [])) for item in payload.room_data}
@@ -1853,9 +2026,13 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                                 id=f"availability-faculty-day-{slot.id}",
                                 type="availability",
                                 severity="medium",
-                                description=f"{faculty.name} is scheduled on unavailable day {day}.",
+                                description=(
+                                    f"{faculty.name} is not available on {day}, but "
+                                    f"{_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)} "
+                                    "is assigned there."
+                                ),
                                 affectedSlots=[slot.id],
-                                resolution="Move the class to a day marked available by the faculty member.",
+                                resolution="Move the class to a day when the assigned faculty member is available, or assign a different available faculty member.",
                             )
                         )
 
@@ -1869,9 +2046,12 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                             id=f"availability-faculty-window-{slot.id}",
                             type="availability",
                             severity="medium",
-                            description=f"{faculty.name} is scheduled outside configured availability window on {day}.",
+                            description=(
+                                f"{faculty.name} is scheduled outside the configured availability window on {day} "
+                                f"for {_slot_context_label(slot=slot, course_map=course_map, fallback_term_number=payload.term_number)}."
+                            ),
                             affectedSlots=[slot.id],
-                            resolution="Shift class timing to match the faculty availability window.",
+                            resolution="Shift this class to a time window approved for the assigned faculty member, or assign another available faculty member.",
                         )
                     )
 
@@ -1887,11 +2067,48 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
                             id=f"availability-room-window-{slot.id}",
                             type="availability",
                             severity="medium",
-                            description=f"Room {room.name} is scheduled outside configured availability window on {day}.",
+                            description=(
+                                f"Room {room.name} is unavailable during {_slot_time_window_label(slot)}, "
+                                f"but {_slot_course_label(slot, course_map)} is scheduled there."
+                            ),
                             affectedSlots=[slot.id],
-                            resolution="Move session to a room-available window or a different room.",
+                            resolution="Move the class to a time when this room is available, or assign a different available compatible room.",
                         )
                     )
+
+    faculty_minutes: dict[str, int] = defaultdict(int)
+    faculty_slot_ids: dict[str, list[str]] = defaultdict(list)
+    for slot in payload.timetable_data:
+        for faculty_id in _slot_all_faculty_ids(slot):
+            if _is_virtual_faculty_id(faculty_id):
+                continue
+            faculty_minutes[faculty_id] += _slot_duration_minutes(slot)
+            faculty_slot_ids[faculty_id].append(slot.id)
+
+    for faculty_id, minutes in faculty_minutes.items():
+        faculty = faculty_map.get(faculty_id)
+        if faculty is None:
+            continue
+        max_hours = int(getattr(faculty, "maxHours", 0) or 0)
+        if max_hours <= 0 or minutes <= (max_hours * 60):
+            continue
+        key = ("workload-overflow", faculty_id)
+        if key in seen_single:
+            continue
+        seen_single.add(key)
+        conflicts.append(
+            TimetableConflict(
+                id=f"workload-overflow-{faculty_id}",
+                type="workload-overflow",
+                severity="high",
+                description=(
+                    f"{faculty.name} is assigned {minutes / 60:.1f} teaching hours in this timetable, "
+                    f"which exceeds the configured weekly maximum of {max_hours:.1f} hours."
+                ),
+                affectedSlots=sorted(faculty_slot_ids.get(faculty_id, [])),
+                resolution="Reassign some classes to other available faculty members or move classes to reduce this faculty member's weekly load.",
+            )
+        )
 
     if db is not None:
         schedule_policy = load_schedule_policy(db)
@@ -1932,21 +2149,22 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
 
             key_suffix = f"{course_id}-{section}-{session_bucket}-{batch or 'all'}"
             if required_minutes and total_minutes != required_minutes:
-                key = ("availability", f"course-duration-{key_suffix}")
+                key = ("course-duration", f"course-duration-{key_suffix}")
                 if key not in seen_single:
                     seen_single.add(key)
-                    label = f"{course_id} section {section}" + (f" batch {batch}" if batch else "")
+                    label = _slot_course_label(slots_sorted[0], course_map)
+                    scope = f"Section {section}" + (f", Batch {batch}" if batch else "")
                     conflicts.append(
                         TimetableConflict(
-                            id=f"availability-course-duration-{key_suffix}",
-                            type="availability",
+                            id=f"course-duration-{key_suffix}",
+                            type="course-duration",
                             severity="high",
                             description=(
-                                f"Scheduled duration for {label} is {total_minutes} minutes; "
-                                f"expected {required_minutes} minutes per week."
+                                f"{label} for {scope} is scheduled for {total_minutes} minutes per week, "
+                                f"but the configured requirement is {required_minutes} minutes."
                             ),
                             affectedSlots=slot_ids,
-                            resolution="Adjust slot count/duration to match required weekly course minutes.",
+                            resolution="Add, remove, or resize this course's slots so the total scheduled weekly minutes exactly match the configured requirement.",
                         )
                     )
 
@@ -1983,34 +2201,38 @@ def _build_conflicts(payload: OfficialTimetablePayload, db: Session | None = Non
             expected_sorted = sorted(expected_block_lengths)
 
             if expected_sorted and len(blocks_sorted) != len(expected_sorted):
-                key = ("availability", f"practical-block-count-{key_suffix}")
+                key = ("practical-block", f"practical-block-count-{key_suffix}")
                 if key not in seen_single:
                     seen_single.add(key)
                     conflicts.append(
                         TimetableConflict(
-                            id=f"availability-practical-block-count-{key_suffix}",
-                            type="availability",
+                            id=f"practical-block-count-{key_suffix}",
+                            type="practical-block",
                             severity="high",
-                            description=f"Practical sessions for {course_id} must be scheduled in contiguous blocks.",
+                            description=(
+                                f"{_slot_course_label(slots_sorted[0], course_map)} practical sessions for Section {section}"
+                                f"{f', Batch {batch}' if batch else ''} are fragmented across too many separate blocks."
+                            ),
                             affectedSlots=slot_ids,
-                            resolution="Merge fragmented practical periods into contiguous blocks.",
+                            resolution="Merge the fragmented practical periods into the required contiguous blocks.",
                         )
                     )
             elif expected_sorted and blocks_sorted != expected_sorted:
-                key = ("availability", f"practical-block-size-{key_suffix}")
+                key = ("practical-block", f"practical-block-size-{key_suffix}")
                 if key not in seen_single:
                     seen_single.add(key)
                     conflicts.append(
                         TimetableConflict(
-                            id=f"availability-practical-block-size-{key_suffix}",
-                            type="availability",
+                            id=f"practical-block-size-{key_suffix}",
+                            type="practical-block",
                             severity="high",
                             description=(
-                                f"Practical sessions for {course_id} must use contiguous blocks of "
+                                f"{_slot_course_label(slots_sorted[0], course_map)} practical sessions for Section {section}"
+                                f"{f', Batch {batch}' if batch else ''} must use contiguous blocks of "
                                 f"{preferred_block_slots} period(s) by default."
                             ),
                             affectedSlots=slot_ids,
-                            resolution="Restructure practical slots to match configured contiguous block size.",
+                            resolution="Restructure the practical sessions so each contiguous block matches the configured block size.",
                         )
                     )
 
@@ -2026,9 +2248,11 @@ def _room_matches_course_type(room: object, course: object | None, *, session_ty
         return True
     if session_type == "lab":
         return getattr(room, "type", None) == "lab"
+    if session_type in {"theory", "tutorial"}:
+        return getattr(room, "type", None) != "lab"
     if session_type is None and getattr(course, "type", None) == "lab":
         return getattr(room, "type", None) == "lab"
-    return True
+    return getattr(room, "type", None) != "lab"
 
 
 def _faculty_available_for_window(
@@ -2811,7 +3035,7 @@ def _apply_best_effort_resolution(
         if resolved_payload is not None:
             return resolved_payload, message
 
-    if (
+    if conflict.type == "practical-block" or (
         conflict.type == "availability"
         and "practical sessions for" in conflict.description.lower()
         and "contiguous block" in conflict.description.lower()
@@ -2841,7 +3065,7 @@ def _apply_best_effort_resolution(
     duration = end - start
 
     # 1) Prefer non-temporal changes first.
-    if conflict.type in {"room-overlap", "capacity", "availability"}:
+    if conflict.type in {"room-overlap", "capacity", "availability", "room-type"}:
         replacement_room = _find_room_candidate(
             payload=payload,
             slot=slot,
@@ -2858,7 +3082,7 @@ def _apply_best_effort_resolution(
             slot.roomId = replacement_room
             return payload, "Resolved by assigning an alternate compatible room."
 
-    if conflict.type in {"faculty-overlap", "availability", "course-faculty-inconsistency"}:
+    if conflict.type in {"faculty-overlap", "availability", "course-faculty-inconsistency", "workload-overflow"}:
         replacement_faculty = _find_faculty_candidate(
             payload=payload,
             slot=slot,
@@ -3177,10 +3401,15 @@ def _conflict_resolution_priority(conflict: TimetableConflict) -> tuple[int, int
         "section-overlap": 0,
         "faculty-overlap": 1,
         "room-overlap": 2,
-        "elective-overlap": 3,
-        "capacity": 4,
-        "availability": 5,
+        "room-type": 3,
+        "working-hours": 4,
+        "workload-overflow": 5,
         "course-faculty-inconsistency": 6,
+        "practical-block": 7,
+        "course-duration": 8,
+        "elective-overlap": 9,
+        "capacity": 10,
+        "availability": 11,
     }
     return (
         severity_rank.get(conflict.severity, 3),

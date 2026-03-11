@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.schemas.settings import DAY_VALUES, TIME_PATTERN, parse_time_to_minutes
 
@@ -34,7 +34,7 @@ class FacultyBase(BaseModel):
     program_id: str | None = Field(default=None, min_length=1, max_length=36)
     name: str = Field(min_length=1, max_length=200)
     designation: str = Field(default="Faculty", min_length=1, max_length=200)
-    email: EmailStr
+    email: str
     department: str = Field(min_length=1, max_length=200)
     workload_hours: int = Field(ge=0, le=200)
     max_hours: int = Field(ge=1, le=200)
@@ -98,7 +98,7 @@ class FacultyUpdate(BaseModel):
     program_id: str | None = Field(default=None, min_length=1, max_length=36)
     name: str | None = Field(default=None, min_length=1, max_length=200)
     designation: str | None = Field(default=None, min_length=1, max_length=200)
-    email: EmailStr | None = None
+    email: str | None = None
     department: str | None = Field(default=None, min_length=1, max_length=200)
     workload_hours: int | None = Field(default=None, ge=0, le=200)
     max_hours: int | None = Field(default=None, ge=1, le=200)

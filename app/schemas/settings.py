@@ -4,7 +4,7 @@ import re
 from typing import Literal
 from typing import ClassVar
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 DAY_VALUES = {
     "Monday",
@@ -182,13 +182,13 @@ class SmtpConfigurationOut(BaseModel):
 
 
 class SmtpTestRequest(BaseModel):
-    to_email: EmailStr | None = None
+    to_email: str | None = None
 
 
 class SmtpTestResponse(BaseModel):
     success: bool
     message: str
-    recipient: EmailStr
+    recipient: str
 
 
 DEFAULT_WORKING_HOURS: list[WorkingHoursEntry] = [

@@ -1349,13 +1349,12 @@ class EvolutionaryScheduler:
 
         # 1) Strict: available day/window and no schedule overlap.
         try_fill(enforce_overlap_free=True, enforce_day_windows=True)
-        # Optional fallbacks are disabled by default so assistants obey
-        # the same overlap/availability expectations as primary faculty.
-        if allow_relaxed_fallback:
-            if len(chosen) < required_count:
-                try_fill(enforce_overlap_free=False, enforce_day_windows=True)
-            if len(chosen) < required_count:
-                try_fill(enforce_overlap_free=False, enforce_day_windows=False)
+        # Optional fallbacks are strictly disabled to prevent overlapping assignments.
+        # if allow_relaxed_fallback:
+        #     if len(chosen) < required_count:
+        #         try_fill(enforce_overlap_free=False, enforce_day_windows=True)
+        #     if len(chosen) < required_count:
+        #         try_fill(enforce_overlap_free=False, enforce_day_windows=False)
 
         if len(chosen) < required_count:
             logger.warning(
@@ -3585,9 +3584,9 @@ class EvolutionaryScheduler:
                 if room.capacity < req.student_count:
                     hard += weights.room_capacity
                 if req.is_lab and room.type != RoomType.lab:
-                    hard += weights.room_type * 20 # Increased penalty
+                    hard += weights.room_type * 20 + weights.room_conflict * 5 # Strictly enforce lab rooms
                 if not req.is_lab and room.type == RoomType.lab:
-                    hard += weights.room_type * 20 # Increased penalty
+                    hard += weights.room_type * 20 + weights.room_conflict * 5 # Strictly enforce lecture rooms
 
             for offset in range(req.block_size):
                 slot_idx = option.start_index + offset
@@ -3929,7 +3928,7 @@ class EvolutionaryScheduler:
             max_minutes = self._effective_faculty_max_hours(faculty) * 60
             if minutes > max_minutes:
                 overflow_periods = max(1, (minutes - max_minutes) // max(1, self.schedule_policy.period_minutes))
-                hard += weights.workload_overflow * overflow_periods
+                hard += weights.workload_overflow * overflow_periods * 5 # Strictly enforce workload limits
             target_hours = self._faculty_min_target_hours(faculty)
             if target_hours > 0:
                 baseline_minutes = self.faculty_three_term_baseline_minutes.get(faculty_id, 0)
@@ -3948,7 +3947,7 @@ class EvolutionaryScheduler:
                     soft += (weights.workload_underflow * deficit_periods) * underflow_multiplier
 
         workload_balance_penalty = self._three_term_workload_balance_penalty(faculty_minutes)
-        soft += workload_balance_penalty * max(1.0, weights.spread_balance)
+        hard += workload_balance_penalty * max(1.0, weights.spread_balance * 3) # Elevate imbalance to a hard constraint factor
 
         sections = {req.section for req in self.block_requests}
         for section in sections:
@@ -3965,7 +3964,7 @@ class EvolutionaryScheduler:
         fitness = -(objectives[0] + objectives[1] + objectives[2])
         result = EvaluationResult(
             fitness=fitness,
-            hard_conflicts=hard,
+            hard_conflicts=int(hard),
             soft_penalty=soft,
             workload_balance_penalty=workload_balance_penalty,
             objectives=objectives,
@@ -7088,13 +7087,13 @@ class EvolutionaryScheduler:
             message=(
                 "MOEA-SA optimization phase complete. "
                 "Applying final post-processing. "
-                f"Termination: {termination_reason}. Best hard conflicts: {best_result.hard_conflicts}."
+                f"Termination: {termination_reason}. Best hard penalty: {best_result.hard_conflicts}."
             ),
             metrics={
                 "termination_reason": termination_reason,
                 "runtime_ms": result.runtime_ms,
                 "alternatives": len(result.alternatives),
-                "best_hard_conflicts": best_result.hard_conflicts,
+                "best_hard_penalty": best_result.hard_conflicts,
                 "best_soft_penalty": round(best_result.soft_penalty, 4),
                 "best_workload_balance_penalty": round(getattr(best_eval, "workload_balance_penalty", 0.0), 4),
                 "best_fitness": round(best_result.fitness, 4),

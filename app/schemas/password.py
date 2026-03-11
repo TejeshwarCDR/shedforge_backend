@@ -1,8 +1,8 @@
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class PasswordResetRequest(BaseModel):
-    email: EmailStr
+    email: str
 
     @field_validator("email")
     @classmethod

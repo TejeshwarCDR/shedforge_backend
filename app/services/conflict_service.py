@@ -152,7 +152,7 @@ class ConflictService:
              # Suggest finding another room
              resolutions.append(ResolutionAction(
                  action_type="change_room",
-                 description="Find a larger or free room",
+                 description="Find a larger or available room to resolve the room conflict.",
                  target_slot_id=conflict.affected_slots[0],
                  parameters={} # Frontend to pop choice
              ))
@@ -160,9 +160,16 @@ class ConflictService:
         if conflict.conflict_type in ("faculty_conflict", "section_conflict"):
              resolutions.append(ResolutionAction(
                  action_type="move_slot",
-                 description="Move to a different time slot",
+                 description="Move this session to a different time slot without conflicts.",
                  target_slot_id=conflict.affected_slots[0],
                  parameters={}
              ))
+             if conflict.conflict_type == "faculty_conflict":
+                 resolutions.append(ResolutionAction(
+                     action_type="change_faculty",
+                     description="Reassign this session to a different available faculty member.",
+                     target_slot_id=conflict.affected_slots[0],
+                     parameters={}
+                 ))
              
         return resolutions

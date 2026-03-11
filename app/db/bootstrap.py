@@ -443,6 +443,68 @@ def _assert_required_columns() -> None:
             raise RuntimeError(f"Missing required columns: {', '.join(missing_columns)}")
 
 
+def _ensure_demo_users_exist() -> None:
+    from app.core.security import get_password_hash
+    with engine.begin() as connection:
+        # Common Demo Password for all generated/synced accounts.
+        hp = get_password_hash("ShedForge@123")
+        
+        # 1. Ensure a program exists for reference (optional fallback)
+        program_id = connection.execute(text("SELECT id FROM programs LIMIT 1")).scalar()
+        if not program_id:
+            program_id = str(uuid.uuid4())
+            connection.execute(
+                text("INSERT INTO programs (id, name, code, department, degree, duration_years) VALUES (:id, 'Computer Science', 'CS', 'CSE', 'BS', 4)"),
+                {"id": program_id}
+            )
+        
+        # 2. Ensure Administrator exists
+        connection.execute(
+            text("""
+                INSERT INTO users (id, name, email, hashed_password, role, is_active)
+                VALUES (:id, 'ShedForge Admin', 'admin@gmail.com', :hp, 'admin', TRUE)
+                ON CONFLICT (email) DO UPDATE SET hashed_password = EXCLUDED.hashed_password, is_active = TRUE
+            """),
+            {"id": str(uuid.uuid4()), "hp": hp}
+        )
+
+        # 3. Synchronize ALL Faculty records
+        # Update all emails in the 'faculty' table to name@mail.com and ensure they have login access.
+        faculty_rows = connection.execute(text("SELECT id, name, email, program_id, department FROM faculty")).fetchall()
+        for f in faculty_rows:
+            # Generate synthetic email: name@mail.com (lowercase, no spaces)
+            new_email = f.name.lower().replace(" ", "") + "@mail.com"
+            
+            # Update the faculty record itself
+            connection.execute(
+                text("UPDATE faculty SET email = :ne WHERE id = :id"),
+                {"ne": new_email, "id": f.id}
+            )
+            
+            # Check for existing user record (by email or ID) and update/create as needed.
+            # Using ID allows us to re-map existing accounts that might have changed names/emails.
+            u_exists = connection.execute(text("SELECT id FROM users WHERE email = :e OR id = :id"), {"e": new_email, "id": f.id}).scalar()
+            if u_exists:
+                connection.execute(
+                    text("UPDATE users SET name = :n, email = :e, hashed_password = :hp, role = 'faculty' WHERE id = :id"),
+                    {"n": f.name, "e": new_email, "hp": hp, "id": u_exists}
+                )
+            else:
+                connection.execute(
+                    text("INSERT INTO users (id, name, email, hashed_password, role, program_id, department, is_active) VALUES (:id, :n, :e, :hp, 'faculty', :pid, :dept, TRUE)"),
+                    {"id": f.id, "n": f.name, "e": new_email, "hp": hp, "pid": f.program_id, "dept": f.department}
+                )
+
+        # 4. Synchronize ALL Student records
+        # In this system, students exist only in the 'users' table with role='student'.
+        students = connection.execute(text("SELECT id, name FROM users WHERE role = 'student'")).fetchall()
+        for s in students:
+            new_email = s.name.lower().replace(" ", "") + "@mail.com"
+            connection.execute(
+                text("UPDATE users SET email = :e, hashed_password = :hp WHERE id = :id"),
+                {"e": new_email, "hp": hp, "id": s.id}
+            )
+
 def ensure_runtime_schema_compatibility() -> None:
     try:
         # Ensure missing tables are present before additive compatibility patches.
@@ -457,6 +519,7 @@ def ensure_runtime_schema_compatibility() -> None:
         _ensure_course_credit_split_columns()
         _ensure_institution_cycle_columns()
         _ensure_program_mapping_columns()
+        _ensure_demo_users_exist()
         _assert_required_columns()
     except Exception as exc:  # pragma: no cover - runtime environment dependent
         logger.exception("Runtime schema compatibility bootstrap failed")

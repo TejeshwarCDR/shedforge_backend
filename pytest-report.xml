@@ -1,0 +1,2999 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="69" skipped="1" tests="128" time="104.857" timestamp="2026-03-11T08:26:20.140747+05:30" hostname="Tejeshwars-MacBook-Pro.local"><testcase classname="tests.test_academic_entities" name="test_program_crud_permissions" time="0.038"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x10cdcecf0&gt;
+
+    def test_program_crud_permissions(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "Computer Science",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_academic_entities.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x10cdcecf0&gt;
+payload = {'department': 'Computer Science', 'email': 'student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_academic_entities.py:4: AssertionError</failure></testcase><testcase classname="tests.test_academic_entities" name="test_students_endpoint_returns_only_students_for_admin_scheduler" time="0.028"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1149c4f50&gt;
+
+    def test_students_endpoint_returns_only_students_for_admin_scheduler(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-students@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        scheduler_payload = {
+            "name": "Scheduler User",
+            "email": "scheduler-students@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty User",
+            "email": "faculty-students@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_a_payload = {
+            "name": "Student Alpha",
+            "email": "student-alpha@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        student_b_payload = {
+            "name": "Student Beta",
+            "email": "student-beta@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "B",
+        }
+    
+        register_user(client, admin_payload)
+        register_user(client, scheduler_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_academic_entities.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x1149c4f50&gt;
+payload = {'department': 'CSE', 'email': 'faculty-students@example.com', 'name': 'Faculty User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_academic_entities.py:4: AssertionError</failure></testcase><testcase classname="tests.test_api_integration" name="test_health_check" time="0.008" /><testcase classname="tests.test_api_integration" name="test_detect_conflicts_valid_payload" time="0.011" /><testcase classname="tests.test_auth" name="test_register_login_logout" time="0.033" /><testcase classname="tests.test_auth" name="test_login_with_email_otp_verification" time="0.010"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x117e4c5f0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10d3d5e00&gt;
+
+    def test_login_with_email_otp_verification(client, monkeypatch):
+        register_payload = {
+            "name": "Faculty User",
+            "email": "faculty@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        register_response = client.post("/api/auth/register", json=register_payload)
+&gt;       assert register_response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_auth.py:61: AssertionError</failure></testcase><testcase classname="tests.test_auth" name="test_login_otp_returns_actionable_error_when_smtp_not_configured" time="0.017"><failure message="AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'">obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+&gt;           obj = getattr(obj, name)
+                  ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'app.api.routes.auth' has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:92: AttributeError
+
+The above exception was the direct cause of the following exception:
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c270&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10d3d5f30&gt;
+
+    def test_login_otp_returns_actionable_error_when_smtp_not_configured(client, monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        register_payload = {
+            "name": "Admin User",
+            "email": "ops-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_response = client.post("/api/auth/register", json=register_payload)
+        assert register_response.status_code == 201
+    
+        def fake_send_email(*, to_email: str, subject: str, text_content: str, html_content=None):
+            raise EmailDeliveryError("SMTP is not configured")
+    
+&gt;       monkeypatch.setattr("app.api.routes.auth.send_email", fake_send_email)
+
+tests/test_auth.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:106: in derive_importpath
+    annotated_getattr(target, attr, ann=module)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+            obj = getattr(obj, name)
+        except AttributeError as e:
+&gt;           raise AttributeError(
+                f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}"
+            ) from e
+E           AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:94: AttributeError</failure></testcase><testcase classname="tests.test_auth" name="test_login_otp_returns_actionable_error_when_smtp_auth_fails" time="0.018"><failure message="AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'">obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+&gt;           obj = getattr(obj, name)
+                  ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'app.api.routes.auth' has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:92: AttributeError
+
+The above exception was the direct cause of the following exception:
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6de10&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x117e3f410&gt;
+
+    def test_login_otp_returns_actionable_error_when_smtp_auth_fails(client, monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        register_payload = {
+            "name": "Scheduler User",
+            "email": "ops-scheduler@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Administration",
+        }
+        register_response = client.post("/api/auth/register", json=register_payload)
+        assert register_response.status_code == 201
+    
+        def fake_send_email(*, to_email: str, subject: str, text_content: str, html_content=None):
+            raise EmailDeliveryError("SMTP authentication failed")
+    
+&gt;       monkeypatch.setattr("app.api.routes.auth.send_email", fake_send_email)
+
+tests/test_auth.py:159: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:106: in derive_importpath
+    annotated_getattr(target, attr, ann=module)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+            obj = getattr(obj, name)
+        except AttributeError as e:
+&gt;           raise AttributeError(
+                f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}"
+            ) from e
+E           AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:94: AttributeError</failure></testcase><testcase classname="tests.test_auth" name="test_login_otp_returns_actionable_error_when_smtp_rate_limited" time="0.017"><failure message="AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'">obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+&gt;           obj = getattr(obj, name)
+                  ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'app.api.routes.auth' has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:92: AttributeError
+
+The above exception was the direct cause of the following exception:
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6d7b0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x11a7449e0&gt;
+
+    def test_login_otp_returns_actionable_error_when_smtp_rate_limited(client, monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        register_payload = {
+            "name": "Rate Limited User",
+            "email": "ops-rate-limited@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_response = client.post("/api/auth/register", json=register_payload)
+        assert register_response.status_code == 201
+    
+        def fake_send_email(*, to_email: str, subject: str, text_content: str, html_content=None):
+            raise EmailDeliveryError("SMTP sender rate limited")
+    
+&gt;       monkeypatch.setattr("app.api.routes.auth.send_email", fake_send_email)
+
+tests/test_auth.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:106: in derive_importpath
+    annotated_getattr(target, attr, ann=module)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+            obj = getattr(obj, name)
+        except AttributeError as e:
+&gt;           raise AttributeError(
+                f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}"
+            ) from e
+E           AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:94: AttributeError</failure></testcase><testcase classname="tests.test_auth" name="test_login_otp_can_fallback_to_terminal_when_enabled" time="0.019"><failure message="AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'">obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+&gt;           obj = getattr(obj, name)
+                  ^^^^^^^^^^^^^^^^^^
+E           AttributeError: module 'app.api.routes.auth' has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:92: AttributeError
+
+The above exception was the direct cause of the following exception:
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6ebe0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x11a745f20&gt;
+
+    def test_login_otp_can_fallback_to_terminal_when_enabled(client, monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        register_payload = {
+            "name": "Fallback User",
+            "email": "ops-terminal-fallback@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_response = client.post("/api/auth/register", json=register_payload)
+        assert register_response.status_code == 201
+    
+        def fake_send_email(*, to_email: str, subject: str, text_content: str, html_content=None):
+            raise EmailDeliveryError("SMTP sender rate limited")
+    
+&gt;       monkeypatch.setattr("app.api.routes.auth.send_email", fake_send_email)
+
+tests/test_auth.py:239: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:106: in derive_importpath
+    annotated_getattr(target, attr, ann=module)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+obj = &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt;
+name = 'send_email', ann = 'app.api.routes.auth'
+
+    def annotated_getattr(obj: object, name: str, ann: str) -&gt; object:
+        try:
+            obj = getattr(obj, name)
+        except AttributeError as e:
+&gt;           raise AttributeError(
+                f"{type(obj).__name__!r} object at {ann} has no attribute {name!r}"
+            ) from e
+E           AttributeError: 'module' object at app.api.routes.auth has no attribute 'send_email'
+
+.venv/lib/python3.13/site-packages/_pytest/monkeypatch.py:94: AttributeError</failure></testcase><testcase classname="tests.test_auth" name="test_faculty_otp_login_recreates_missing_faculty_profile" time="0.017"><failure message="AssertionError: assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code&#10; +    where &lt;Response [400 Bad Request]&gt; = post('/api/auth/register', json={'department': 'CSE', 'email': 'faculty-remap@example.com', 'name': 'Faculty User', 'password': 'password123', ...})&#10; +      where post = &lt;starlette.testclient.TestClient object at 0x11018af10&gt;.post">client = &lt;starlette.testclient.TestClient object at 0x11018af10&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x117e32b50&gt;
+
+    def test_faculty_otp_login_recreates_missing_faculty_profile(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-faculty-map@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty User",
+            "email": "faculty-remap@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        assert client.post("/api/auth/register", json=admin_payload).status_code == 201
+&gt;       assert client.post("/api/auth/register", json=faculty_payload).status_code == 201
+E       AssertionError: assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+E        +    where &lt;Response [400 Bad Request]&gt; = post('/api/auth/register', json={'department': 'CSE', 'email': 'faculty-remap@example.com', 'name': 'Faculty User', 'password': 'password123', ...})
+E        +      where post = &lt;starlette.testclient.TestClient object at 0x11018af10&gt;.post
+
+tests/test_auth.py:281: AssertionError</failure></testcase><testcase classname="tests.test_auth" name="test_login_rate_limit_blocks_excessive_attempts" time="0.031" /><testcase classname="tests.test_auth" name="test_query_user_by_email_retries_after_schema_bootstrap" time="0.000"><failure message="AttributeError: &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt; has no attribute 'ensure_runtime_schema_compatibility'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x112434350&gt;
+
+    def test_query_user_by_email_retries_after_schema_bootstrap(monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        expected_user = object()
+        bootstrap_calls = {"count": 0}
+    
+        class DummyResult:
+            def scalar_one_or_none(self):
+                return expected_user
+    
+        class DummyDB:
+            def __init__(self):
+                self.execute_calls = 0
+                self.rollback_calls = 0
+    
+            def execute(self, _statement):
+                self.execute_calls += 1
+                if self.execute_calls == 1:
+                    raise ProgrammingError(
+                        "SELECT users.id FROM users",
+                        {},
+                        Exception("column users.section_name does not exist"),
+                    )
+                return DummyResult()
+    
+            def rollback(self):
+                self.rollback_calls += 1
+    
+        db = DummyDB()
+    
+        def fake_bootstrap():
+            bootstrap_calls["count"] += 1
+    
+&gt;       monkeypatch.setattr(auth_module, "ensure_runtime_schema_compatibility", fake_bootstrap)
+E       AttributeError: &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt; has no attribute 'ensure_runtime_schema_compatibility'
+
+tests/test_auth.py:420: AttributeError</failure></testcase><testcase classname="tests.test_auth" name="test_query_user_by_email_returns_actionable_error_on_unrecoverable_schema_drift" time="0.000"><failure message="AttributeError: &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt; has no attribute 'ensure_runtime_schema_compatibility'">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x117e9cb90&gt;
+
+    def test_query_user_by_email_returns_actionable_error_on_unrecoverable_schema_drift(monkeypatch):
+        import app.api.routes.auth as auth_module
+    
+        class DummyDB:
+            def execute(self, _statement):
+                raise ProgrammingError(
+                    "SELECT users.id FROM users",
+                    {},
+                    Exception("column users.section_name does not exist"),
+                )
+    
+            def rollback(self):
+                return None
+    
+&gt;       monkeypatch.setattr(
+            auth_module,
+            "ensure_runtime_schema_compatibility",
+            lambda: (_ for _ in ()).throw(RuntimeError("bootstrap failed")),
+        )
+E       AttributeError: &lt;module 'app.api.routes.auth' from '/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/app/api/routes/auth.py'&gt; has no attribute 'ensure_runtime_schema_compatibility'
+
+tests/test_auth.py:444: AttributeError</failure></testcase><testcase classname="tests.test_benchmark_scheduler" name="test_benchmark_fast_solver_performance" time="0.001" /><testcase classname="tests.test_benchmark_scheduler" name="test_full_integration_benchmark" time="0.000"><skipped type="pytest.skip" message="Needs full integration environment with seeded data">/Users/tejeshwarcdr/Documents/Documents - Tejeshwar’s MacBook Pro/ShedForge/ShedForge-split-deploy/backend/tests/test_benchmark_scheduler.py:37: Needs full integration environment with seeded data</skipped></testcase><testcase classname="tests.test_bootstrap" name="test_runtime_schema_bootstrap_raises_on_validation_failure" time="67.132" /><testcase classname="tests.test_conflict_hardening_helpers" name="test_build_reserved_slots_from_payload_includes_assistant_faculty" time="0.001" /><testcase classname="tests.test_conflict_hardening_helpers" name="test_cross_term_overlap_count_includes_assistant_faculty_usage" time="0.000" /><testcase classname="tests.test_conflict_hardening_helpers" name="test_resource_placement_conflicts_detect_assistant_overlap" time="0.000" /><testcase classname="tests.test_conflict_service" name="test_detect_room_conflict" time="0.001" /><testcase classname="tests.test_conflict_service" name="test_detect_faculty_conflict" time="0.000" /><testcase classname="tests.test_conflict_service" name="test_detect_capacity_conflict" time="0.000" /><testcase classname="tests.test_conflict_service" name="test_no_conflicts" time="0.000" /><testcase classname="tests.test_constructive_solver" name="test_request_priority_order_lab_first" time="0.001" /><testcase classname="tests.test_constructive_solver" name="test_request_priority_order_large_blocks_first" time="0.000" /><testcase classname="tests.test_constructive_solver" name="test_request_priority_order_few_options_first" time="0.000" /><testcase classname="tests.test_constructive_solver" name="test_constructive_individual_picks_best_fit" time="0.001" /><testcase classname="tests.test_constructive_solver" name="test_constructive_individual_avoids_hard_conflicts_fallback" time="0.001" /><testcase classname="tests.test_curriculum_reevaluation" name="test_curriculum_change_events_and_selective_reevaluation" time="0.383" /><testcase classname="tests.test_debug_gen" name="test_run_diagonal_gen" time="13.417" /><testcase classname="tests.test_elective_overlap_groups" name="test_elective_overlap_groups_publish_validation_and_cleanup" time="0.090" /><testcase classname="tests.test_email_reliability" name="test_send_email_uses_backup_after_primary_rate_limit" time="0.000"><failure message="IndexError: list index out of range">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x116d6b930&gt;
+
+    def test_send_email_uses_backup_after_primary_rate_limit(monkeypatch):
+        settings = _settings(
+            smtp_backup_host="smtp.backup.test",
+            smtp_backup_username="backup-user",
+            smtp_backup_password="backup-pass",
+            smtp_backup_from_email="backup@example.com",
+        )
+        monkeypatch.setattr(email_service, "get_settings", lambda: settings)
+    
+        sends: list[tuple[str, int, str]] = []
+    
+        class FakeSMTP:
+            def __init__(self, host, port, timeout=None):
+                self.host = host
+                self.port = port
+    
+            def __enter__(self):
+                return self
+    
+            def __exit__(self, exc_type, exc, tb):
+                return False
+    
+            def starttls(self, context=None):
+                return None
+    
+            def login(self, username, password):
+                return None
+    
+            def send_message(self, message):
+                sends.append((self.host, self.port, message["From"]))
+                if self.host == "smtp.primary.test":
+                    raise smtplib.SMTPDataError(550, b"Daily user sending limit exceeded")
+                return {}
+    
+        monkeypatch.setattr(email_service.smtplib, "SMTP", FakeSMTP)
+        monkeypatch.setattr(email_service.smtplib, "SMTP_SSL", FakeSMTP)
+    
+        email_service.send_email(
+            to_email="recipient@example.com",
+            subject="Your ShedForge Login Verification Code",
+            text_content="OTP body",
+        )
+    
+&gt;       assert sends[0][0] == "smtp.primary.test"
+               ^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_email_reliability.py:92: IndexError</failure></testcase><testcase classname="tests.test_email_reliability" name="test_send_email_retries_connection_drop_and_succeeds" time="0.000"><failure message="assert 0 == 2">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1139a1710&gt;
+
+    def test_send_email_retries_connection_drop_and_succeeds(monkeypatch):
+        settings = _settings(smtp_retry_attempts=2, smtp_retry_backoff_seconds=0.0)
+        monkeypatch.setattr(email_service, "get_settings", lambda: settings)
+    
+        attempt_counter = {"count": 0}
+    
+        class FlakySMTP:
+            def __init__(self, host, port, timeout=None):
+                self.host = host
+                self.port = port
+    
+            def __enter__(self):
+                return self
+    
+            def __exit__(self, exc_type, exc, tb):
+                return False
+    
+            def starttls(self, context=None):
+                return None
+    
+            def login(self, username, password):
+                return None
+    
+            def send_message(self, message):
+                attempt_counter["count"] += 1
+                if attempt_counter["count"] == 1:
+                    raise smtplib.SMTPServerDisconnected("network drop")
+                return {}
+    
+        monkeypatch.setattr(email_service.smtplib, "SMTP", FlakySMTP)
+        monkeypatch.setattr(email_service.smtplib, "SMTP_SSL", FlakySMTP)
+    
+        email_service.send_email(
+            to_email="recipient@example.com",
+            subject="Critical system alert",
+            text_content="hello",
+        )
+    
+&gt;       assert attempt_counter["count"] == 2
+E       assert 0 == 2
+
+tests/test_email_reliability.py:138: AssertionError</failure></testcase><testcase classname="tests.test_email_reliability" name="test_notification_email_prefers_backup_when_enabled" time="0.000"><failure message="AssertionError: assert [] == ['smtp.backup.test']&#10;  &#10;  Right contains one more item: 'smtp.backup.test'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1100c01f0&gt;
+
+    def test_notification_email_prefers_backup_when_enabled(monkeypatch):
+        settings = _settings(
+            smtp_backup_host="smtp.backup.test",
+            smtp_backup_username="backup-user",
+            smtp_backup_password="backup-pass",
+            smtp_backup_from_email="backup@example.com",
+            smtp_notification_prefer_backup=True,
+        )
+        monkeypatch.setattr(email_service, "get_settings", lambda: settings)
+    
+        contacted_hosts: list[str] = []
+    
+        class FakeSMTP:
+            def __init__(self, host, port, timeout=None):
+                self.host = host
+                self.port = port
+    
+            def __enter__(self):
+                return self
+    
+            def __exit__(self, exc_type, exc, tb):
+                return False
+    
+            def starttls(self, context=None):
+                return None
+    
+            def login(self, username, password):
+                return None
+    
+            def send_message(self, message):
+                contacted_hosts.append(self.host)
+                return {}
+    
+        monkeypatch.setattr(email_service.smtplib, "SMTP", FakeSMTP)
+        monkeypatch.setattr(email_service.smtplib, "SMTP_SSL", FakeSMTP)
+    
+        email_service.send_email(
+            to_email="recipient@example.com",
+            subject="ShedForge Notification: Timetable Updated",
+            text_content="updated",
+        )
+    
+&gt;       assert contacted_hosts == ["smtp.backup.test"]
+E       AssertionError: assert [] == ['smtp.backup.test']
+E         
+E         Right contains one more item: 'smtp.backup.test'
+E         Use -v to get more diff
+
+tests/test_email_reliability.py:183: AssertionError</failure></testcase><testcase classname="tests.test_email_reliability" name="test_send_email_raises_rate_limit_error_when_all_endpoints_exhausted" time="0.000"><failure message="Failed: DID NOT RAISE &lt;class 'app.services.email.EmailDeliveryError'&gt;">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x11395e2d0&gt;
+
+    def test_send_email_raises_rate_limit_error_when_all_endpoints_exhausted(monkeypatch):
+        settings = _settings(
+            smtp_backup_host="smtp.backup.test",
+            smtp_backup_username="backup-user",
+            smtp_backup_password="backup-pass",
+            smtp_backup_from_email="backup@example.com",
+        )
+        monkeypatch.setattr(email_service, "get_settings", lambda: settings)
+    
+        class FakeSMTP:
+            def __init__(self, host, port, timeout=None):
+                self.host = host
+                self.port = port
+    
+            def __enter__(self):
+                return self
+    
+            def __exit__(self, exc_type, exc, tb):
+                return False
+    
+            def starttls(self, context=None):
+                return None
+    
+            def login(self, username, password):
+                return None
+    
+            def send_message(self, message):
+                raise smtplib.SMTPDataError(550, b"sending limit exceeded")
+    
+        monkeypatch.setattr(email_service.smtplib, "SMTP", FakeSMTP)
+        monkeypatch.setattr(email_service.smtplib, "SMTP_SSL", FakeSMTP)
+    
+&gt;       with pytest.raises(EmailDeliveryError) as exc_info:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE &lt;class 'app.services.email.EmailDeliveryError'&gt;
+
+tests/test_email_reliability.py:218: Failed</failure></testcase><testcase classname="tests.test_evolutionary_engine" name="test_generation_respects_slot_locks_with_zero_hard_conflicts" time="0.024"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6df20&gt;
+
+    def test_generation_respects_slot_locks_with_zero_hard_conflicts(client):
+        admin_payload = {
+            "name": "Engine Admin",
+            "email": "engine-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        faculty = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Locked",
+                "email": "prof.locked@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_evolutionary_engine.py:89: AssertionError</failure></testcase><testcase classname="tests.test_evolutionary_engine" name="test_generation_aligns_shared_lecture_sections" time="0.028"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e7a0&gt;
+
+    def test_generation_aligns_shared_lecture_sections(client):
+        admin_payload = {
+            "name": "Shared Admin",
+            "email": "shared-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        faculty = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Shared",
+                "email": "prof.shared@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_evolutionary_engine.py:234: AssertionError</failure></testcase><testcase classname="tests.test_evolutionary_engine" name="test_generation_fails_fast_when_section_credit_load_exceeds_available_weekly_slots" time="0.024"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e140&gt;
+
+    def test_generation_fails_fast_when_section_credit_load_exceeds_available_weekly_slots(client):
+        admin_payload = {
+            "name": "Load Validation Admin",
+            "email": "load-validation-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        faculty = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Heavy",
+                "email": "prof.heavy@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 40,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_evolutionary_engine.py:375: AssertionError</failure></testcase><testcase classname="tests.test_evolutionary_engine" name="test_auto_strategy_continues_after_conflicted_hybrid_if_annealing_is_conflict_free" time="0.000" /><testcase classname="tests.test_evolutionary_engine" name="test_teacher_back_to_back_slots_are_soft_penalized" time="0.000"><failure message="assert 60 == 0&#10; +  where 60 = EvaluationResult(fitness=-76.0, hard_conflicts=60, soft_penalty=15.0, workload_balance_penalty=1.0, objectives=(60.0, 15.0, 1.0)).hard_conflicts">def test_teacher_back_to_back_slots_are_soft_penalized():
+        scheduler = _build_scheduler_for_teacher_back_to_back(
+            first_faculty_id="f1",
+            second_faculty_id="f1",
+            first_room_id="r1",
+            second_room_id="r2",
+            first_section="A",
+            second_section="B",
+        )
+    
+        evaluation = scheduler._evaluate([0, 0])
+        conflicted = scheduler._conflicted_request_ids([0, 0])
+    
+&gt;       assert evaluation.hard_conflicts == 0
+E       assert 60 == 0
+E        +  where 60 = EvaluationResult(fitness=-76.0, hard_conflicts=60, soft_penalty=15.0, workload_balance_penalty=1.0, objectives=(60.0, 15.0, 1.0)).hard_conflicts
+
+tests/test_evolutionary_engine.py:699: AssertionError</failure></testcase><testcase classname="tests.test_evolutionary_engine" name="test_back_to_back_is_not_applied_to_room_or_section" time="0.000" /><testcase classname="tests.test_evolutionary_engine" name="test_elective_course_must_align_time_slots_across_sections" time="0.000" /><testcase classname="tests.test_evolutionary_engine" name="test_elective_course_same_slot_across_sections_is_valid" time="0.000" /><testcase classname="tests.test_evolutionary_engine" name="test_single_faculty_enforcement_relaxes_when_dedicated_capacity_is_insufficient" time="0.000" /><testcase classname="tests.test_faculty_preferences_and_cycle" name="test_faculty_registration_auto_creates_profile_and_allows_preference_updates" time="0.009"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c6b0&gt;
+
+    def test_faculty_registration_auto_creates_profile_and_allows_preference_updates(client):
+        faculty_payload = {
+            "name": "Dr. Faculty User",
+            "email": "faculty-user@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["23cse211", "23CSE302", "23cse211"],
+        }
+&gt;       register_user(client, faculty_payload)
+
+tests/test_faculty_preferences_and_cycle.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c6b0&gt;
+payload = {'department': 'CSE', 'email': 'faculty-user@example.com', 'name': 'Dr. Faculty User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_faculty_preferences_and_cycle.py:3: AssertionError</failure></testcase><testcase classname="tests.test_faculty_preferences_and_cycle" name="test_cycle_generation_avoids_cross_term_faculty_and_room_overlap" time="0.028"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a746be0&gt;
+
+    def test_cycle_generation_avoids_cross_term_faculty_and_room_overlap(client):
+        admin_payload = {
+            "name": "Cycle Admin",
+            "email": "cycle-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        faculty_response = client.post(
+            "/api/faculty",
+            json={
+                "name": "Dr. Shared Faculty",
+                "designation": "Associate Professor",
+                "email": "shared-faculty@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+                "avoid_back_to_back": False,
+                "preferred_min_break_minutes": 0,
+                "preference_notes": None,
+                "preferred_subject_codes": ["CSE101A", "CSE301A"],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_faculty_preferences_and_cycle.py:94: AssertionError</failure></testcase><testcase classname="tests.test_faculty_workload" name="test_faculty_workload_enforcement" time="0.009"><failure message="sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: faculty.program_id&#10;[SQL: INSERT INTO faculty (id, program_id, name, designation, email, department, workload_hours, max_hours, availability, availability_windows, avoid_back_to_back, preferred_min_break_minutes, preference_notes, preferred_subject_codes, semester_preferences, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]&#10;[parameters: ('98d20867-e746-4a2d-b237-e0e234c21cbc', None, 'Test Faculty Workload', 'Faculty', 'tfw@example.com', 'CSE', 0, 10, '[]', '[]', 0, 0, None, '[]', '{}', None)]&#10;(Background on this error at: https://sqlalche.me/e/20/gkpj)">self = &lt;sqlalchemy.engine.base.Connection object at 0x10c5a7890&gt;
+dialect = &lt;sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x1138fdbd0&gt;
+context = &lt;sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x10c5a5cd0&gt;
+statement = &lt;sqlalchemy.dialects.sqlite.base.SQLiteCompiler object at 0x10cb20f50&gt;
+parameters = [('98d20867-e746-4a2d-b237-e0e234c21cbc', None, 'Test Faculty Workload', 'Faculty', 'tfw@example.com', 'CSE', ...)]
+
+    def _exec_single_context(
+        self,
+        dialect: Dialect,
+        context: ExecutionContext,
+        statement: Union[str, Compiled],
+        parameters: Optional[_AnyMultiExecuteParams],
+    ) -&gt; CursorResult[Any]:
+        """continue the _execute_context() method for a single DBAPI
+        cursor.execute() or cursor.executemany() call.
+    
+        """
+        if dialect.bind_typing is BindTyping.SETINPUTSIZES:
+            generic_setinputsizes = context._prepare_set_input_sizes()
+    
+            if generic_setinputsizes:
+                try:
+                    dialect.do_set_input_sizes(
+                        context.cursor, generic_setinputsizes, context
+                    )
+                except BaseException as e:
+                    self._handle_dbapi_exception(
+                        e, str(statement), parameters, None, context
+                    )
+    
+        cursor, str_statement, parameters = (
+            context.cursor,
+            context.statement,
+            context.parameters,
+        )
+    
+        effective_parameters: Optional[_AnyExecuteParams]
+    
+        if not context.executemany:
+            effective_parameters = parameters[0]
+        else:
+            effective_parameters = parameters
+    
+        if self._has_events or self.engine._has_events:
+            for fn in self.dispatch.before_cursor_execute:
+                str_statement, effective_parameters = fn(
+                    self,
+                    cursor,
+                    str_statement,
+                    effective_parameters,
+                    context,
+                    context.executemany,
+                )
+    
+        if self._echo:
+            self._log_info(str_statement)
+    
+            stats = context._get_cache_stats()
+    
+            if not self.engine.hide_parameters:
+                self._log_info(
+                    "[%s] %r",
+                    stats,
+                    sql_util._repr_params(
+                        effective_parameters,
+                        batches=10,
+                        ismulti=context.executemany,
+                    ),
+                )
+            else:
+                self._log_info(
+                    "[%s] [SQL parameters hidden due to hide_parameters=True]",
+                    stats,
+                )
+    
+        evt_handled: bool = False
+        try:
+            if context.execute_style is ExecuteStyle.EXECUTEMANY:
+                effective_parameters = cast(
+                    "_CoreMultiExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_executemany:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_executemany(
+                        cursor,
+                        str_statement,
+                        effective_parameters,
+                        context,
+                    )
+            elif not effective_parameters and context.no_parameters:
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute_no_params:
+                        if fn(cursor, str_statement, context):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+                    self.dialect.do_execute_no_params(
+                        cursor, str_statement, context
+                    )
+            else:
+                effective_parameters = cast(
+                    "_CoreSingleExecuteParams", effective_parameters
+                )
+                if self.dialect._has_events:
+                    for fn in self.dialect.dispatch.do_execute:
+                        if fn(
+                            cursor,
+                            str_statement,
+                            effective_parameters,
+                            context,
+                        ):
+                            evt_handled = True
+                            break
+                if not evt_handled:
+&gt;                   self.dialect.do_execute(
+                        cursor, str_statement, effective_parameters, context
+                    )
+
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x1138fdbd0&gt;
+cursor = &lt;sqlite3.Cursor object at 0x113793840&gt;
+statement = 'INSERT INTO faculty (id, program_id, name, designation, email, department, workload_hours, max_hours, availability, a..._codes, semester_preferences, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('98d20867-e746-4a2d-b237-e0e234c21cbc', None, 'Test Faculty Workload', 'Faculty', 'tfw@example.com', 'CSE', ...)
+context = &lt;sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x10c5a5cd0&gt;
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+&gt;       cursor.execute(statement, parameters)
+E       sqlite3.IntegrityError: NOT NULL constraint failed: faculty.program_id
+
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: IntegrityError
+
+The above exception was the direct cause of the following exception:
+
+client = &lt;starlette.testclient.TestClient object at 0x11a746e00&gt;
+
+    def test_faculty_workload_enforcement(client):
+        # Hack to get the session from the client/app dependency override
+        db_gen = client.app.dependency_overrides[get_db]()
+        db = next(db_gen)
+    
+        try:
+            # 1. seed dummy data
+            program = Program(name="Test Program Workload", code="TEST-WORKLOAD", department="CSE", degree="BS", duration_years=4, total_students=60)
+            db.add(program)
+            db.commit()
+            db.refresh(program)
+    
+            term = ProgramTerm(program_id=program.id, term_number=1, name="Term 1", credits_required=10)
+            db.add(term)
+            db.commit()
+    
+            faculty = Faculty(name="Test Faculty Workload", email="tfw@example.com", department="CSE", max_hours=10) # Max 10 hours
+            db.add(faculty)
+&gt;           db.commit()
+
+tests/test_faculty_workload.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:2030: in commit
+    trans.commit(_to_root=True)
+&lt;string&gt;:2: in commit
+    ???
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:1311: in commit
+    self._prepare_impl()
+&lt;string&gt;:2: in _prepare_impl
+    ???
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py:137: in _go
+    ret_value = fn(self, *arg, **kw)
+                ^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:1286: in _prepare_impl
+    self.session.flush()
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:4331: in flush
+    self._flush(objects)
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:4466: in _flush
+    with util.safe_reraise():
+         ^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py:121: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py:4427: in _flush
+    flush_context.execute()
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py:466: in execute
+    rec.execute(self)
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1419: in execute
+    return meth(
+.venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1846: in _execute_context
+    return self._exec_single_context(
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;sqlalchemy.dialects.sqlite.pysqlite.SQLiteDialect_pysqlite object at 0x1138fdbd0&gt;
+cursor = &lt;sqlite3.Cursor object at 0x113793840&gt;
+statement = 'INSERT INTO faculty (id, program_id, name, designation, email, department, workload_hours, max_hours, availability, a..._codes, semester_preferences, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at'
+parameters = ('98d20867-e746-4a2d-b237-e0e234c21cbc', None, 'Test Faculty Workload', 'Faculty', 'tfw@example.com', 'CSE', ...)
+context = &lt;sqlalchemy.dialects.sqlite.base.SQLiteExecutionContext object at 0x10c5a5cd0&gt;
+
+    def do_execute(self, cursor, statement, parameters, context=None):
+&gt;       cursor.execute(statement, parameters)
+E       sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: faculty.program_id
+E       [SQL: INSERT INTO faculty (id, program_id, name, designation, email, department, workload_hours, max_hours, availability, availability_windows, avoid_back_to_back, preferred_min_break_minutes, preference_notes, preferred_subject_codes, semester_preferences, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at]
+E       [parameters: ('98d20867-e746-4a2d-b237-e0e234c21cbc', None, 'Test Faculty Workload', 'Faculty', 'tfw@example.com', 'CSE', 0, 10, '[]', '[]', 0, 0, None, '[]', '{}', None)]
+E       (Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+.venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py:952: IntegrityError</failure></testcase><testcase classname="tests.test_fast_solver" name="test_fast_solver_basic_generation" time="0.154" /><testcase classname="tests.test_fast_solver" name="test_fast_solver_handles_conflicts" time="0.266" /><testcase classname="tests.test_feedback" name="test_feedback_submission_routes_to_admin_and_tracks_scope" time="0.015"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e250&gt;
+
+    def test_feedback_submission_routes_to_admin_and_tracks_scope(client):
+        admin_payload = {
+            "name": "Admin Feedback",
+            "email": "admin-feedback@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student Reporter",
+            "email": "student-feedback@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        faculty_payload = {
+            "name": "Faculty Viewer",
+            "email": "faculty-feedback@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_feedback.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6e250&gt;
+payload = {'department': 'CSE', 'email': 'student-feedback@example.com', 'name': 'Student Reporter', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_feedback.py:3: AssertionError</failure></testcase><testcase classname="tests.test_feedback" name="test_feedback_creation_emits_realtime_notification_for_admin" time="0.015"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6ef10&gt;
+
+    def test_feedback_creation_emits_realtime_notification_for_admin(client):
+        admin_payload = {
+            "name": "Admin WS Feedback",
+            "email": "admin-feedback-ws@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student WS Feedback",
+            "email": "student-feedback-ws@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_feedback.py:107: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6ef10&gt;
+payload = {'department': 'CSE', 'email': 'student-feedback-ws@example.com', 'name': 'Student WS Feedback', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_feedback.py:3: AssertionError</failure></testcase><testcase classname="tests.test_feedback" name="test_feedback_thread_updates_and_notifies_reporter" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e140&gt;
+
+    def test_feedback_thread_updates_and_notifies_reporter(client):
+        admin_payload = {
+            "name": "Admin Responder",
+            "email": "admin-responder@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty Reporter",
+            "email": "faculty-reporter@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_feedback.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6e140&gt;
+payload = {'department': 'CSE', 'email': 'faculty-reporter@example.com', 'name': 'Faculty Reporter', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_feedback.py:3: AssertionError</failure></testcase><testcase classname="tests.test_feedback" name="test_feedback_permissions_enforced_for_non_admin_users" time="0.016"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747ce0&gt;
+
+    def test_feedback_permissions_enforced_for_non_admin_users(client):
+        admin_payload = {
+            "name": "Admin Gatekeeper",
+            "email": "admin-gate@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_a_payload = {
+            "name": "Student A",
+            "email": "student-a-feedback@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        student_b_payload = {
+            "name": "Student B",
+            "email": "student-b-feedback@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "B",
+        }
+        scheduler_payload = {
+            "name": "Scheduler Staff",
+            "email": "scheduler-feedback@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Office",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_a_payload)
+
+tests/test_feedback.py:245: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747ce0&gt;
+payload = {'department': 'CSE', 'email': 'student-a-feedback@example.com', 'name': 'Student A', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_feedback.py:3: AssertionError</failure></testcase><testcase classname="tests.test_frontend_backend_contract" name="test_frontend_consumed_http_endpoints_are_exposed_by_backend" time="0.000"><failure message="AssertionError: Frontend API contract mismatch. Missing backend endpoints: [('/api/auth/login/request-otp', 'post'), ('/api/auth/login/verify-otp', 'post'), ('/api/auth/password/change', 'post'), ('/api/auth/password/forgot', 'post'), ('/api/auth/password/reset', 'post')]&#10;assert not [('/api/auth/login/request-otp', 'post'), ('/api/auth/login/verify-otp', 'post'), ('/api/auth/password/change', 'post'), ('/api/auth/password/forgot', 'post'), ('/api/auth/password/reset', 'post')]">def test_frontend_consumed_http_endpoints_are_exposed_by_backend() -&gt; None:
+        available = {
+            (route.path, method.lower())
+            for route in app.routes
+            if isinstance(route, APIRoute)
+            for method in route.methods
+            if method not in {"HEAD", "OPTIONS"}
+        }
+    
+        missing = sorted(EXPECTED_HTTP_ENDPOINTS - available)
+&gt;       assert not missing, f"Frontend API contract mismatch. Missing backend endpoints: {missing}"
+E       AssertionError: Frontend API contract mismatch. Missing backend endpoints: [('/api/auth/login/request-otp', 'post'), ('/api/auth/login/verify-otp', 'post'), ('/api/auth/password/change', 'post'), ('/api/auth/password/forgot', 'post'), ('/api/auth/password/reset', 'post')]
+E       assert not [('/api/auth/login/request-otp', 'post'), ('/api/auth/login/verify-otp', 'post'), ('/api/auth/password/change', 'post'), ('/api/auth/password/forgot', 'post'), ('/api/auth/password/reset', 'post')]
+
+tests/test_frontend_backend_contract.py:117: AssertionError</failure></testcase><testcase classname="tests.test_frontend_backend_contract" name="test_frontend_consumed_notifications_websocket_exists" time="0.000" /><testcase classname="tests.test_generation_respects_unassigned_resources" name="test_generation_skips_real_room_and_faculty_when_not_required" time="0.149" /><testcase classname="tests.test_generator" name="test_generation_settings_and_slot_locks" time="0.023"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e140&gt;
+
+    def test_generation_settings_and_slot_locks(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+&gt;       foundation = create_foundation(client, admin_token)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generator.py:206: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6e140&gt;
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzMyODQyNjIsInN1YiI6IjdlZGQ1NTYxLTBiZDQtNDg5OS1iMDhhLTdlMDc4MTc2MjE0NiJ9.UES-_qHf-qnWR8w58C1IvVCTuJiyzbAEhZHUNvoc9fI'
+
+    def create_foundation(client, admin_token):
+        faculty_one = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Theory",
+                "email": "theory@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_one.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_generator.py:36: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_timetable_generation_and_publish" time="0.024"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c6b0&gt;
+
+    def test_timetable_generation_and_publish(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin2@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+&gt;       foundation = create_foundation(client, admin_token)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generator.py:282: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c6b0&gt;
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzMyODQyNjIsInN1YiI6IjZhOGJiZjRkLTVkNzAtNDE3NC1hODZhLTk4YWI0NTRlMjZlYSJ9.k63q0MxWA2BJVfnMrWXCY8AJsNLi5Nrt5I9qzrRhC2c'
+
+    def create_foundation(client, admin_token):
+        faculty_one = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Theory",
+                "email": "theory@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_one.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_generator.py:36: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_timetable_generation_with_simulated_annealing_strategy" time="0.024"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c9e0&gt;
+
+    def test_timetable_generation_with_simulated_annealing_strategy(client):
+        admin_payload = {
+            "name": "Admin Anneal",
+            "email": "admin-anneal@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+&gt;       foundation = create_foundation(client, admin_token)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generator.py:340: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c9e0&gt;
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzMyODQyNjIsInN1YiI6IjhiMTFmOTU0LThmY2YtNDQyZS1hOWQ5LWQyNzJkNzQ4MjFkYSJ9.52lZ8mnUJsaxU_kWr0J8ynn7ZsLI021EbaIecnZgF10'
+
+    def create_foundation(client, admin_token):
+        faculty_one = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Theory",
+                "email": "theory@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_one.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_generator.py:36: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_timetable_generation_with_stale_assigned_faculty" time="0.024"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c5a0&gt;
+
+    def test_timetable_generation_with_stale_assigned_faculty(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-stale-faculty@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+&gt;       foundation = create_foundation(client, admin_token)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generator.py:427: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c5a0&gt;
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzMyODQyNjIsInN1YiI6IjczYmYxOTMxLWI5YWQtNDVhYS1iNDM2LTU4ZmYyYTQ0MmYxMiJ9.M8JATxPsetSl5BgYiHJHkRXbrnszYYqsfWtr7IkVKqk'
+
+    def create_foundation(client, admin_token):
+        faculty_one = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Theory",
+                "email": "theory@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_one.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_generator.py:36: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_generation_uses_feasibility_fallback_when_room_windows_block_all_slots" time="0.025"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6e7a0&gt;
+
+    def test_generation_uses_feasibility_fallback_when_room_windows_block_all_slots(client):
+        admin_payload = {
+            "name": "Admin Fallback",
+            "email": "admin-fallback-room@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+&gt;       foundation = create_foundation(client, admin_token)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_generator.py:484: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6e7a0&gt;
+admin_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzMyODQyNjIsInN1YiI6Ijk5NjQ5OGMzLTE3ZTUtNDU1MC1hNGM1LTlmNWZhNTJkMzVmZSJ9.CSRj2Gw_GMHyRDt9Qg2WNj9261Utnb5QnFtfNXgtBm8'
+
+    def create_foundation(client, admin_token):
+        faculty_one = client.post(
+            "/api/faculty",
+            json={
+                "name": "Prof Theory",
+                "email": "theory@example.com",
+                "department": "CSE",
+                "workload_hours": 0,
+                "max_hours": 20,
+                "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "availability_windows": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_one.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_generator.py:36: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_generate_returns_ranked_candidates_with_warning_when_conflicts_remain" time="0.028"><failure message="assert 0 == 3">client = &lt;starlette.testclient.TestClient object at 0x11a746690&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1162badb0&gt;
+
+    def test_generate_returns_ranked_candidates_with_warning_when_conflicts_remain(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-conflict@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        def fake_run_generation(*, db, settings, payload, reserved_resource_slots=None):
+            return GenerateTimetableResponse(
+                alternatives=[
+                    GeneratedAlternative(
+                        rank=1,
+                        fitness=-1000.0,
+                        hard_conflicts=3,
+                        soft_penalty=0.0,
+                        payload=OfficialTimetablePayload(
+                            programId=payload.program_id,
+                            termNumber=payload.term_number,
+                            facultyData=[],
+                            courseData=[],
+                            roomData=[],
+                            timetableData=[],
+                        ),
+                    )
+                ],
+                settings_used=GenerationSettingsBase(),
+                runtime_ms=1,
+            )
+    
+        monkeypatch.setattr("app.api.routes.generator._run_generation", fake_run_generation)
+    
+        response = client.post(
+            "/api/timetable/generate",
+            json={
+                "program_id": "program-test",
+                "term_number": 1,
+                "alternative_count": 1,
+                "persist_official": True,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["alternatives"]
+&gt;       assert payload["alternatives"][0]["hard_conflicts"] == 3
+E       assert 0 == 3
+
+tests/test_generator.py:592: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_generate_filters_out_hard_conflict_alternatives" time="0.026"><failure message="AssertionError: assert 2 == 1&#10; +  where 2 = len([{'fitness': 100.0, 'hard_conflicts': 0, 'occupancy_matrix': {'faculty_labels': {}, 'faculty_matrix': {}, 'room_labels...x': {}, ...}, 'payload': {'courseData': [], 'facultyData': [], 'programId': 'program-test', 'roomData': [], ...}, ...}])">client = &lt;starlette.testclient.TestClient object at 0x11a745e10&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x1162b9bd0&gt;
+
+    def test_generate_filters_out_hard_conflict_alternatives(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-conflict-filter@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        def fake_run_generation(*, db, settings, payload, reserved_resource_slots=None):
+            return GenerateTimetableResponse(
+                alternatives=[
+                    GeneratedAlternative(
+                        rank=1,
+                        fitness=100.0,
+                        hard_conflicts=0,
+                        soft_penalty=5.0,
+                        payload=OfficialTimetablePayload(
+                            programId=payload.program_id,
+                            termNumber=payload.term_number,
+                            facultyData=[],
+                            courseData=[],
+                            roomData=[],
+                            timetableData=[],
+                        ),
+                    ),
+                    GeneratedAlternative(
+                        rank=2,
+                        fitness=120.0,
+                        hard_conflicts=2,
+                        soft_penalty=1.0,
+                        payload=OfficialTimetablePayload(
+                            programId=payload.program_id,
+                            termNumber=payload.term_number,
+                            facultyData=[],
+                            courseData=[],
+                            roomData=[],
+                            timetableData=[],
+                        ),
+                    ),
+                ],
+                settings_used=GenerationSettingsBase(),
+                runtime_ms=1,
+            )
+    
+        monkeypatch.setattr("app.api.routes.generator._run_generation", fake_run_generation)
+    
+        response = client.post(
+            "/api/timetable/generate",
+            json={
+                "program_id": "program-test",
+                "term_number": 1,
+                "alternative_count": 2,
+                "persist_official": False,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+&gt;       assert len(payload["alternatives"]) == 1
+E       AssertionError: assert 2 == 1
+E        +  where 2 = len([{'fitness': 100.0, 'hard_conflicts': 0, 'occupancy_matrix': {'faculty_labels': {}, 'faculty_matrix': {}, 'room_labels...x': {}, ...}, 'payload': {'courseData': [], 'facultyData': [], 'programId': 'program-test', 'roomData': [], ...}, ...}])
+
+tests/test_generator.py:658: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_generate_reloads_user_after_session_reset" time="0.025" /><testcase classname="tests.test_generator" name="test_cycle_generation_retries_without_reserved_slots_when_strict_mode_is_infeasible" time="0.032" /><testcase classname="tests.test_generator" name="test_cycle_generation_reloads_faculty_after_session_reset" time="0.141" /><testcase classname="tests.test_generator" name="test_generate_skips_publish_and_returns_warning_when_conflicts_remain" time="0.026"><failure message="assert 0 == 2">client = &lt;starlette.testclient.TestClient object at 0x11a744af0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10d0d4ad0&gt;
+
+    def test_generate_skips_publish_and_returns_warning_when_conflicts_remain(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-publish-warning@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        def fake_run_generation(*, db, settings, payload, reserved_resource_slots=None):
+            return GenerateTimetableResponse(
+                alternatives=[
+                    GeneratedAlternative(
+                        rank=1,
+                        fitness=-1000.0,
+                        hard_conflicts=2,
+                        soft_penalty=0.0,
+                        payload=OfficialTimetablePayload(
+                            programId=payload.program_id,
+                            termNumber=payload.term_number,
+                            facultyData=[],
+                            courseData=[],
+                            roomData=[],
+                            timetableData=[],
+                        ),
+                    )
+                ],
+                settings_used=GenerationSettingsBase(),
+                runtime_ms=1,
+            )
+    
+        monkeypatch.setattr("app.api.routes.generator._run_generation", fake_run_generation)
+    
+        response = client.post(
+            "/api/timetable/generate",
+            json={
+                "program_id": "program-test",
+                "term_number": 1,
+                "alternative_count": 1,
+                "persist_official": True,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["alternatives"]
+&gt;       assert payload["alternatives"][0]["hard_conflicts"] == 2
+E       assert 0 == 2
+
+tests/test_generator.py:1011: AssertionError</failure></testcase><testcase classname="tests.test_generator" name="test_generate_publish_persists_even_if_notification_dispatch_fails" time="0.029" /><testcase classname="tests.test_governance_features" name="test_timetable_versions_notifications_and_activity_logs" time="0.016"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747570&gt;
+
+    def test_timetable_versions_notifications_and_activity_logs(client):
+        admin_payload = {
+            "name": "Admin Governance",
+            "email": "admin-governance@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student Governance",
+            "email": "student-governance@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_governance_features.py:97: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747570&gt;
+payload = {'department': 'CSE', 'email': 'student-governance@example.com', 'name': 'Student Governance', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_governance_features.py:6: AssertionError</failure></testcase><testcase classname="tests.test_governance_features" name="test_substitute_suggestions_and_issue_workflow" time="0.015"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747130&gt;
+
+    def test_substitute_suggestions_and_issue_workflow(client):
+        admin_payload = {
+            "name": "Admin Ops",
+            "email": "admin-ops@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student Ops",
+            "email": "student-ops@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_governance_features.py:186: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747130&gt;
+payload = {'department': 'CSE', 'email': 'student-ops@example.com', 'name': 'Student Ops', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_governance_features.py:6: AssertionError</failure></testcase><testcase classname="tests.test_health" name="test_health_endpoints" time="1.863" /><testcase classname="tests.test_inspect_rooms" name="test_inspect_rooms" time="1.011"><failure message="AttributeError: 'NoneType' object has no attribute 'id'">def test_inspect_rooms():
+        db = SessionLocal()
+        try:
+            rooms = db.execute(select(Room)).scalars().all()
+            print(f"\nTOTAL ROOMS: {len(rooms)}")
+            for r in rooms:
+                print(f"ROOM: {r.name} | TYPE: {r.type} | CAP: {r.capacity}")
+    
+            lecture_count = sum(1 for r in rooms if r.type == RoomType.lecture)
+            lab_count = sum(1 for r in rooms if r.type == RoomType.lab)
+            seminar_count = sum(1 for r in rooms if r.type == RoomType.seminar)
+    
+            print(f"\nCOUNTS -&gt; Lecture: {lecture_count}, Lab: {lab_count}, Seminar: {seminar_count}")
+    
+            # Simulate scheduler's logic
+            student_count = 60 # Typical section size
+            import hashlib
+    
+            def room_tiebreak(room: Room, seed: str) -&gt; str:
+                return hashlib.blake2b(f"{seed}|{room.id}".encode()).hexdigest()
+    
+            def select_mock(room_candidates, student_count, seed):
+                ranked = sorted(
+                    room_candidates,
+                    key=lambda room: (
+                        room.capacity &lt; student_count,
+                        abs(room.capacity - student_count),
+                        room_tiebreak(room, seed),
+                    ),
+                )
+                return ranked[:20]
+    
+            lecture_rooms = [r for r in rooms if r.type == RoomType.lecture]
+    
+            print("\nSECTIONS FOR BTECH-CSE-2023 TERM 5:")
+            from app.models.program_structure import ProgramSection
+            p = db.execute(select(Program).where(Program.code == "BTECH-CSE-2023")).scalars().first()
+&gt;           sections = db.execute(select(ProgramSection).where(ProgramSection.program_id == p.id, ProgramSection.term_number == 5)).scalars().all()
+                                                                                            ^^^^
+E           AttributeError: 'NoneType' object has no attribute 'id'
+
+tests/test_inspect_rooms.py:44: AttributeError</failure></testcase><testcase classname="tests.test_issue_threads" name="test_issue_thread_supports_admin_replies_and_status_flow" time="0.091" /><testcase classname="tests.test_issue_threads" name="test_issue_thread_permissions_are_enforced" time="0.058" /><testcase classname="tests.test_leaves" name="test_faculty_leave_request_flow" time="0.017"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c380&gt;
+
+    def test_faculty_leave_request_flow(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-leaves@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty User",
+            "email": "faculty-leaves@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_leaves.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c380&gt;
+payload = {'department': 'CSE', 'email': 'faculty-leaves@example.com', 'name': 'Faculty User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_leaves.py:6: AssertionError</failure></testcase><testcase classname="tests.test_leaves" name="test_leave_approval_creates_substitute_offer_and_faculty_can_accept" time="0.015"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a745f20&gt;
+
+    def test_leave_approval_creates_substitute_offer_and_faculty_can_accept(client):
+        admin_payload = {
+            "name": "Admin Offer Flow",
+            "email": "admin-offer-flow@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        leave_faculty_payload = {
+            "name": "Leave Faculty",
+            "email": "leave-faculty-offer@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        substitute_payload = {
+            "name": "Offer Faculty",
+            "email": "substitute-faculty-offer@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["CSOFFER101"],
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, leave_faculty_payload)
+
+tests/test_leaves.py:113: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a745f20&gt;
+payload = {'department': 'CSE', 'email': 'leave-faculty-offer@example.com', 'name': 'Leave Faculty', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_leaves.py:6: AssertionError</failure></testcase><testcase classname="tests.test_leaves" name="test_rejecting_last_substitute_offer_triggers_reschedule" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a746690&gt;
+
+    def test_rejecting_last_substitute_offer_triggers_reschedule(client):
+        admin_payload = {
+            "name": "Admin Reschedule",
+            "email": "admin-reschedule@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        leave_faculty_payload = {
+            "name": "Faculty Reschedule Leave",
+            "email": "faculty-reschedule-leave@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        substitute_payload = {
+            "name": "Faculty Rejects",
+            "email": "faculty-reschedule-substitute@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["CSRESCH101"],
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, leave_faculty_payload)
+
+tests/test_leaves.py:254: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a746690&gt;
+payload = {'department': 'CSE', 'email': 'faculty-reschedule-leave@example.com', 'name': 'Faculty Reschedule Leave', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_leaves.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notification_admin_updates" name="test_settings_updates_notify_all_non_actor_users_with_email" time="0.026"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747790&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10e1f1e10&gt;
+
+    def test_settings_updates_notify_all_non_actor_users_with_email(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin Settings",
+            "email": "admin-settings-notify@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        scheduler_payload = {
+            "name": "Scheduler Settings",
+            "email": "scheduler-settings-notify@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty Settings",
+            "email": "faculty-settings-notify@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_payload = {
+            "name": "Student Settings",
+            "email": "student-settings-notify@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+        register_user(client, scheduler_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_notification_admin_updates.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747790&gt;
+payload = {'department': 'CSE', 'email': 'faculty-settings-notify@example.com', 'name': 'Faculty Settings', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_notification_admin_updates.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notification_admin_updates" name="test_academic_data_updates_notify_admin_scheduler_faculty_only" time="0.022"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747570&gt;
+
+    def test_academic_data_updates_notify_admin_scheduler_faculty_only(client):
+        admin_payload = {
+            "name": "Admin Academic",
+            "email": "admin-academic-notify@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        scheduler_payload = {
+            "name": "Scheduler Academic",
+            "email": "scheduler-academic-notify@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty Academic",
+            "email": "faculty-academic-notify@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_payload = {
+            "name": "Student Academic",
+            "email": "student-academic-notify@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+        register_user(client, scheduler_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_notification_admin_updates.py:125: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747570&gt;
+payload = {'department': 'CSE', 'email': 'faculty-academic-notify@example.com', 'name': 'Faculty Academic', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_notification_admin_updates.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_notification_filters_and_mark_all_read" time="0.017"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c8d0&gt;
+
+    def test_notification_filters_and_mark_all_read(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "notify-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "notify-student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_notifications_system.py:130: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c8d0&gt;
+payload = {'department': 'CSE', 'email': 'notify-student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_substitute_assignment_notifies_leave_owner_and_substitute" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a746250&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10c527e00&gt;
+
+    def test_substitute_assignment_notifies_leave_owner_and_substitute(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin Leave",
+            "email": "admin-substitute@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        leave_faculty_payload = {
+            "name": "Faculty Leave",
+            "email": "faculty-leave@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        substitute_faculty_payload = {
+            "name": "Faculty Substitute",
+            "email": "faculty-substitute@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, leave_faculty_payload)
+
+tests/test_notifications_system.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a746250&gt;
+payload = {'department': 'CSE', 'email': 'faculty-leave@example.com', 'name': 'Faculty Leave', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_leave_approval_auto_reassigns_slots_by_preference_and_notifies_users" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a7459d0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x118650f30&gt;
+
+    def test_leave_approval_auto_reassigns_slots_by_preference_and_notifies_users(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin Auto Substitute",
+            "email": "admin-auto-substitute@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        leave_faculty_payload = {
+            "name": "Faculty On Leave",
+            "email": "faculty-auto-leave@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": [],
+        }
+        substitute_faculty_payload = {
+            "name": "Faculty Cover",
+            "email": "faculty-auto-cover@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["CSAUTO101"],
+        }
+        student_payload = {
+            "name": "Student Auto",
+            "email": "student-auto-section-a@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, leave_faculty_payload)
+
+tests/test_notifications_system.py:309: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a7459d0&gt;
+payload = {'department': 'CSE', 'email': 'faculty-auto-leave@example.com', 'name': 'Faculty On Leave', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_leave_auto_substitute_skips_preferred_faculty_when_not_free_in_slot_window" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a744af0&gt;
+
+    def test_leave_auto_substitute_skips_preferred_faculty_when_not_free_in_slot_window(client):
+        admin_payload = {
+            "name": "Admin Busy Substitute",
+            "email": "admin-busy-substitute@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        leave_faculty_payload = {
+            "name": "Faculty Busy Leave",
+            "email": "faculty-busy-leave@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        substitute_faculty_payload = {
+            "name": "Faculty Busy Cover",
+            "email": "faculty-busy-cover@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["CSBUSY101"],
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, leave_faculty_payload)
+
+tests/test_notifications_system.py:487: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a744af0&gt;
+payload = {'department': 'CSE', 'email': 'faculty-busy-leave@example.com', 'name': 'Faculty Busy Leave', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_timetable_update_targets_impacted_students" time="0.015"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a746be0&gt;
+
+    def test_timetable_update_targets_impacted_students(client):
+        admin_payload = {
+            "name": "Admin Publish",
+            "email": "admin-notify-publish@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_a_payload = {
+            "name": "Student A",
+            "email": "student-a-notify@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        student_b_payload = {
+            "name": "Student B",
+            "email": "student-b-notify@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "B",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_a_payload)
+
+tests/test_notifications_system.py:637: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a746be0&gt;
+payload = {'department': 'CSE', 'email': 'student-a-notify@example.com', 'name': 'Student A', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_notifications_system" name="test_notifications_websocket_stream_receives_realtime_events" time="0.017"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a744160&gt;
+
+    def test_notifications_websocket_stream_receives_realtime_events(client):
+        admin_payload = {
+            "name": "Admin WS",
+            "email": "admin-ws@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student WS",
+            "email": "student-ws@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_notifications_system.py:694: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a744160&gt;
+payload = {'department': 'CSE', 'email': 'student-ws@example.com', 'name': 'Student WS', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_notifications_system.py:6: AssertionError</failure></testcase><testcase classname="tests.test_password_reset" name="test_password_reset_flow" time="0.015"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1147ea9c0&gt;
+
+    def test_password_reset_flow(client):
+        payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, payload)
+    
+        reset_request = client.post("/api/auth/password/forgot", json={"email": payload["email"]})
+&gt;       assert reset_request.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_password_reset.py:28: AssertionError</failure></testcase><testcase classname="tests.test_password_reset" name="test_password_change_flow" time="0.022"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1147ea8b0&gt;
+
+    def test_password_change_flow(client):
+        payload = {
+            "name": "Scheduler User",
+            "email": "scheduler@example.com",
+            "password": "password123",
+            "role": "scheduler",
+            "department": "Scheduling",
+        }
+        register_user(client, payload)
+        token = login_user(client, payload["email"], payload["password"], "scheduler")
+    
+        change_response = client.post(
+            "/api/auth/password/change",
+            json={"current_password": "password123", "new_password": "updatedpass123"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+&gt;       assert change_response.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_password_reset.py:61: AssertionError</failure></testcase><testcase classname="tests.test_performance" name="test_performance_constructive_solver" time="16.689"><failure message="AssertionError: Scheduler took too long: 16.6247s&#10;assert 16.624657154083252 &lt; 5.0">def test_performance_constructive_solver():
+        # Setup: 50 courses * 2 sections * 3 slots = 300 slots to schedule
+        # This is a medium-sized department schedule.
+        scheduler = BenchmarkScheduler(num_courses=40, sections_per_course=2)
+    
+        print(f"\nStarting benchmark with {len(scheduler.block_requests)} block requests...")
+    
+        start_time = time.time()
+    
+        # Run the constructive heuristic
+        # This is the core logic we want to benchmark.
+        individual = scheduler._constructive_individual(randomized=True)
+    
+        end_time = time.time()
+        duration = end_time - start_time
+    
+        print(f"Scheduling completed in {duration:.4f} seconds.")
+    
+        # Assert performance target (e.g., &lt; 5 seconds for this workload)
+        # The user requirement was &lt; 10 seconds for standard dataset.
+&gt;       assert duration &lt; 5.0, f"Scheduler took too long: {duration:.4f}s"
+E       AssertionError: Scheduler took too long: 16.6247s
+E       assert 16.624657154083252 &lt; 5.0
+
+tests/test_performance.py:164: AssertionError</failure></testcase><testcase classname="tests.test_prerequisites" name="test_prerequisite_constraints_across_program_assignment_generation_and_publish" time="0.075"><failure message="AssertionError: assert 'Prerequisite constraints are not satisfied' in 'Scheduled credits (1.00, computed as L+T+P/2) must exactly match program term requirement (3.00)'">client = &lt;starlette.testclient.TestClient object at 0x1147ebbd0&gt;
+
+    def test_prerequisite_constraints_across_program_assignment_generation_and_publish(client):
+        admin_payload = {
+            "name": "Admin Prereq",
+            "email": "admin-prereq@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        register_user(client, admin_payload)
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        create_program = client.post(
+            "/api/programs",
+            json={
+                "name": "B.Tech CSE",
+                "code": "CSE",
+                "department": "CSE",
+                "degree": "BS",
+                "duration_years": 4,
+                "sections": 1,
+                "total_students": 60,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert create_program.status_code == 201
+        program_id = create_program.json()["id"]
+    
+        for term_number in (1, 2):
+            term_response = client.post(
+                f"/api/programs/{program_id}/terms",
+                json={
+                    "term_number": term_number,
+                    "name": f"Semester {term_number}",
+                    "credits_required": 3,
+                },
+                headers={"Authorization": f"Bearer {admin_token}"},
+            )
+            assert term_response.status_code == 201
+    
+        section_response = client.post(
+            f"/api/programs/{program_id}/sections",
+            json={"term_number": 2, "name": "A", "capacity": 50},
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert section_response.status_code == 201
+    
+        intro_course = client.post(
+            "/api/courses",
+            json={
+                "code": "CS101",
+                "name": "Programming Fundamentals",
+                "type": "theory",
+                "credits": 3,
+                "duration_hours": 1,
+                "sections": 1,
+                "hours_per_week": 1,
+                "faculty_id": None,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert intro_course.status_code == 201
+        intro_course_id = intro_course.json()["id"]
+    
+        advanced_course = client.post(
+            "/api/courses",
+            json={
+                "code": "CS201",
+                "name": "Advanced Programming",
+                "type": "theory",
+                "credits": 3,
+                "duration_hours": 1,
+                "sections": 1,
+                "hours_per_week": 1,
+                "faculty_id": None,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert advanced_course.status_code == 201
+        advanced_course_id = advanced_course.json()["id"]
+    
+        invalid_prereq_add = client.post(
+            f"/api/programs/{program_id}/courses",
+            json={
+                "term_number": 2,
+                "course_id": advanced_course_id,
+                "is_required": True,
+                "prerequisite_course_ids": [intro_course_id],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert invalid_prereq_add.status_code == 400
+        assert "earlier terms" in invalid_prereq_add.json()["detail"]
+    
+        intro_program_course = client.post(
+            f"/api/programs/{program_id}/courses",
+            json={
+                "term_number": 1,
+                "course_id": intro_course_id,
+                "is_required": True,
+                "prerequisite_course_ids": [],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert intro_program_course.status_code == 201
+        intro_program_course_id = intro_program_course.json()["id"]
+    
+        valid_prereq_add = client.post(
+            f"/api/programs/{program_id}/courses",
+            json={
+                "term_number": 2,
+                "course_id": advanced_course_id,
+                "is_required": True,
+                "prerequisite_course_ids": [intro_course_id],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert valid_prereq_add.status_code == 201
+        assert valid_prereq_add.json()["prerequisite_course_ids"] == [intro_course_id]
+    
+        create_self_prereq = client.post(
+            "/api/courses",
+            json={
+                "code": "CS202",
+                "name": "Self Reference Course",
+                "type": "theory",
+                "credits": 3,
+                "duration_hours": 1,
+                "sections": 1,
+                "hours_per_week": 1,
+                "faculty_id": None,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert create_self_prereq.status_code == 201
+        self_course_id = create_self_prereq.json()["id"]
+    
+        invalid_self_prereq = client.post(
+            f"/api/programs/{program_id}/courses",
+            json={
+                "term_number": 2,
+                "course_id": self_course_id,
+                "is_required": True,
+                "prerequisite_course_ids": [self_course_id],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert invalid_self_prereq.status_code == 400
+        assert "cannot be a prerequisite of itself" in invalid_self_prereq.json()["detail"]
+    
+        delete_intro_mapping = client.delete(
+            f"/api/programs/{program_id}/courses/{intro_program_course_id}",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert delete_intro_mapping.status_code == 200
+    
+        generate_response = client.post(
+            "/api/timetable/generate",
+            json={
+                "program_id": program_id,
+                "term_number": 2,
+                "alternative_count": 1,
+                "persist_official": False,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert generate_response.status_code == 400
+        assert "Prerequisite constraints are not satisfied" in generate_response.json()["detail"]
+    
+        publish_response = client.put(
+            "/api/timetable/official",
+            json={
+                "programId": program_id,
+                "termNumber": 2,
+                "facultyData": [
+                    {
+                        "id": "f1",
+                        "name": "Faculty One",
+                        "department": "CSE",
+                        "workloadHours": 0,
+                        "maxHours": 20,
+                        "availability": ["Monday", "Tuesday"],
+                        "email": "faculty1@example.com",
+                        "currentWorkload": 0,
+                    }
+                ],
+                "courseData": [
+                    {
+                        "id": advanced_course_id,
+                        "code": "CS201",
+                        "name": "Advanced Programming",
+                        "type": "theory",
+                        "credits": 3,
+                        "facultyId": "f1",
+                        "duration": 1,
+                        "hoursPerWeek": 1,
+                    }
+                ],
+                "roomData": [
+                    {
+                        "id": "r1",
+                        "name": "A101",
+                        "capacity": 70,
+                        "type": "lecture",
+                        "building": "Main",
+                        "hasLabEquipment": False,
+                        "hasProjector": True,
+                        "utilization": 0,
+                    }
+                ],
+                "timetableData": [
+                    {
+                        "id": "slot-1",
+                        "day": "Monday",
+                        "startTime": "08:50",
+                        "endTime": "09:40",
+                        "courseId": advanced_course_id,
+                        "roomId": "r1",
+                        "facultyId": "f1",
+                        "section": "A",
+                        "studentCount": 50,
+                    }
+                ],
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert publish_response.status_code == 400
+&gt;       assert "Prerequisite constraints are not satisfied" in publish_response.json()["detail"]
+E       AssertionError: assert 'Prerequisite constraints are not satisfied' in 'Scheduled credits (1.00, computed as L+T+P/2) must exactly match program term requirement (3.00)'
+
+tests/test_prerequisites.py:242: AssertionError</failure></testcase><testcase classname="tests.test_program_structure" name="test_program_structure_permissions" time="0.019"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1147eb460&gt;
+
+    def test_program_structure_permissions(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "Computer Science",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_program_structure.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x1147eb460&gt;
+payload = {'department': 'Computer Science', 'email': 'student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_program_structure.py:4: AssertionError</failure></testcase><testcase classname="tests.test_schedule_policy" name="test_schedule_policy_permissions_and_persistence" time="0.019"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1147ebac0&gt;
+
+    def test_schedule_policy_permissions_and_persistence(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_schedule_policy.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x1147ebac0&gt;
+payload = {'department': 'CSE', 'email': 'student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_schedule_policy.py:3: AssertionError</failure></testcase><testcase classname="tests.test_schedule_policy" name="test_schedule_policy_enforces_lab_slot_blocks" time="0.047" /><testcase classname="tests.test_scheduler_error" name="test_scheduler_error_structure" time="0.001" /><testcase classname="tests.test_scheduler_error" name="test_app_error_defaults" time="0.000" /><testcase classname="tests.test_scheduling_constraints" name="test_room_overlap_prevention" time="0.001" /><testcase classname="tests.test_scheduling_constraints" name="test_section_overlap_prevention" time="0.000" /><testcase classname="tests.test_scheduling_constraints" name="test_room_type_consistency" time="0.000" /><testcase classname="tests.test_semester_constraints" name="test_semester_constraints_crud_and_enforcement" time="0.033"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6df20&gt;
+
+    def test_semester_constraints_crud_and_enforcement(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CS",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_semester_constraints.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6df20&gt;
+payload = {'department': 'CS', 'email': 'student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_semester_constraints.py:3: AssertionError</failure></testcase><testcase classname="tests.test_semester_constraints" name="test_semester_weekly_limit_is_validated_per_section_not_global" time="0.033" /><testcase classname="tests.test_settings_smtp" name="test_smtp_config_endpoint_for_admin" time="0.023" /><testcase classname="tests.test_settings_smtp" name="test_smtp_test_endpoint_returns_503_with_actionable_message" time="0.022" /><testcase classname="tests.test_settings_smtp" name="test_smtp_test_endpoint_returns_rate_limit_error_message" time="0.024" /><testcase classname="tests.test_shared_lecture_groups" name="test_shared_lecture_group_validation_and_publish_behavior" time="0.065" /><testcase classname="tests.test_student_load" name="test_curriculum_mismatch_detection" time="0.763"><failure message="AttributeError: 'NoneType' object has no attribute 'code'">def test_curriculum_mismatch_detection():
+        db = SessionLocal()
+        try:
+            program = db.execute(select(Program).where(Program.code == "BTECH-CSE-2023")).scalars().first()
+            settings = GenerationSettingsBase(
+                random_seed=42,
+                population_size=20,
+                generations=10,
+                solver_strategy="fast",
+                objective_weights=ObjectiveWeights()
+            )
+    
+&gt;           print(f"\nTESTING FLEXIBLE ALIGNMENT FOR {program.code} TERM 1...")
+                                                      ^^^^^^^^^^^^
+E           AttributeError: 'NoneType' object has no attribute 'code'
+
+tests/test_student_load.py:23: AttributeError</failure></testcase><testcase classname="tests.test_system_analytics" name="test_system_analytics_endpoint_aggregates_inventory_activity_and_operations" time="0.030"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a745f20&gt;
+
+    def test_system_analytics_endpoint_aggregates_inventory_activity_and_operations(client):
+        admin_payload = {
+            "name": "Admin Analytics",
+            "email": "admin-system-analytics@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student Analytics",
+            "email": "student-system-analytics@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_system_analytics.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a745f20&gt;
+payload = {'department': 'CSE', 'email': 'student-system-analytics@example.com', 'name': 'Student Analytics', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_system_analytics.py:3: AssertionError</failure></testcase><testcase classname="tests.test_teacher_preferences_and_academic_cycle" name="test_student_section_required_and_faculty_workload_caps" time="0.034"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a745ae0&gt;
+
+    def test_student_section_required_and_faculty_workload_caps(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-teacher-pref@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        assert register_user(client, admin_payload).status_code == 201
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        missing_section_student = {
+            "name": "Student User",
+            "email": "student-missing-section@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+        }
+        missing_response = register_user(client, missing_section_student)
+        assert missing_response.status_code == 422
+        assert "section_name is required" in str(missing_response.json())
+    
+        professor_payload = {
+            "name": "Dr. Assoc Faculty",
+            "designation": "Associate Professor",
+            "email": "assoc-faculty@example.com",
+            "department": "CSE",
+            "workload_hours": 0,
+            "max_hours": 20,
+            "availability": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+            "availability_windows": [],
+            "semester_preferences": {"3": ["23cse211", "23cse212"]},
+        }
+        faculty_response = client.post(
+            "/api/faculty",
+            json=professor_payload,
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+&gt;       assert faculty_response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_teacher_preferences_and_academic_cycle.py:53: AssertionError</failure></testcase><testcase classname="tests.test_teacher_preferences_and_academic_cycle" name="test_academic_cycle_settings_and_faculty_mapping_endpoint" time="0.019"><failure message="AssertionError: assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code&#10; +    where &lt;Response [400 Bad Request]&gt; = register_user(&lt;starlette.testclient.TestClient object at 0x112b6c8d0&gt;, {'department': 'CSE', 'email': 'faculty-mapping@example.com', 'name': 'Faculty Mapping', 'password': 'password123', ...})">client = &lt;starlette.testclient.TestClient object at 0x112b6c8d0&gt;
+
+    def test_academic_cycle_settings_and_faculty_mapping_endpoint(client):
+        admin_payload = {
+            "name": "Admin Mapping",
+            "email": "admin-mapping@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty Mapping",
+            "email": "faculty-mapping@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+            "preferred_subject_codes": ["23cse311"],
+        }
+        student_payload = {
+            "name": "Student Mapping",
+            "email": "student-mapping@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+    
+        assert register_user(client, admin_payload).status_code == 201
+&gt;       assert register_user(client, faculty_payload).status_code == 201
+E       AssertionError: assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+E        +    where &lt;Response [400 Bad Request]&gt; = register_user(&lt;starlette.testclient.TestClient object at 0x112b6c8d0&gt;, {'department': 'CSE', 'email': 'faculty-mapping@example.com', 'name': 'Faculty Mapping', 'password': 'password123', ...})
+
+tests/test_teacher_preferences_and_academic_cycle.py:102: AssertionError</failure></testcase><testcase classname="tests.test_teacher_preferences_and_academic_cycle" name="test_course_credit_split_validation" time="0.026"><failure message="assert 'hours_per_week must equal theory_hours + lab_hours + tutorial_hours' in &quot;{'detail': [{'type': 'value_error', 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutoria... 'batch_year': 3, 'theory_hours': 2, 'lab_hours': 1, 'tutorial_hours': 1, 'faculty_id': None}, 'ctx': {'error': {}}}]}&quot;&#10; +  where &quot;{'detail': [{'type': 'value_error', 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutoria... 'batch_year': 3, 'theory_hours': 2, 'lab_hours': 1, 'tutorial_hours': 1, 'faculty_id': None}, 'ctx': {'error': {}}}]}&quot; = str({'detail': [{'ctx': {'error': {}}, 'input': {'batch_year': 3, 'code': '23CSE999', 'credits': 3, 'duration_hours': 1, ...}, 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutorial + practical (L + T + P)', ...}]})&#10; +    where {'detail': [{'ctx': {'error': {}}, 'input': {'batch_year': 3, 'code': '23CSE999', 'credits': 3, 'duration_hours': 1, ...}, 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutorial + practical (L + T + P)', ...}]} = json()&#10; +      where json = &lt;Response [422 Unprocessable Entity]&gt;.json">client = &lt;starlette.testclient.TestClient object at 0x112b6e7a0&gt;
+
+    def test_course_credit_split_validation(client):
+        admin_payload = {
+            "name": "Admin Credits",
+            "email": "admin-credit-split@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        assert register_user(client, admin_payload).status_code == 201
+        admin_token = login_user(client, admin_payload["email"], admin_payload["password"], "admin")
+    
+        invalid_course = client.post(
+            "/api/courses",
+            json={
+                "code": "23CSE999",
+                "name": "Invalid Split",
+                "type": "theory",
+                "credits": 3,
+                "duration_hours": 1,
+                "sections": 1,
+                "hours_per_week": 3,
+                "semester_number": 5,
+                "batch_year": 3,
+                "theory_hours": 2,
+                "lab_hours": 1,
+                "tutorial_hours": 1,
+                "faculty_id": None,
+            },
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        assert invalid_course.status_code == 422
+&gt;       assert "hours_per_week must equal theory_hours + lab_hours + tutorial_hours" in str(invalid_course.json())
+E       assert 'hours_per_week must equal theory_hours + lab_hours + tutorial_hours' in "{'detail': [{'type': 'value_error', 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutoria... 'batch_year': 3, 'theory_hours': 2, 'lab_hours': 1, 'tutorial_hours': 1, 'faculty_id': None}, 'ctx': {'error': {}}}]}"
+E        +  where "{'detail': [{'type': 'value_error', 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutoria... 'batch_year': 3, 'theory_hours': 2, 'lab_hours': 1, 'tutorial_hours': 1, 'faculty_id': None}, 'ctx': {'error': {}}}]}" = str({'detail': [{'ctx': {'error': {}}, 'input': {'batch_year': 3, 'code': '23CSE999', 'credits': 3, 'duration_hours': 1, ...}, 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutorial + practical (L + T + P)', ...}]})
+E        +    where {'detail': [{'ctx': {'error': {}}, 'input': {'batch_year': 3, 'code': '23CSE999', 'credits': 3, 'duration_hours': 1, ...}, 'loc': ['body'], 'msg': 'Value error, hours_per_week must equal lecture + tutorial + practical (L + T + P)', ...}]} = json()
+E        +      where json = &lt;Response [422 Unprocessable Entity]&gt;.json
+
+tests/test_teacher_preferences_and_academic_cycle.py:307: AssertionError</failure></testcase><testcase classname="tests.test_timetable_insights" name="test_timetable_conflicts_and_analytics_endpoints" time="0.019"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1147ea8b0&gt;
+
+    def test_timetable_conflicts_and_analytics_endpoints(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-insights@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student-insights@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_timetable_insights.py:33: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x1147ea8b0&gt;
+payload = {'department': 'CSE', 'email': 'student-insights@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_timetable_insights.py:3: AssertionError</failure></testcase><testcase classname="tests.test_timetable_insights" name="test_timetable_conflict_analysis_endpoint_supports_draft_payload" time="0.029" /><testcase classname="tests.test_timetable_insights" name="test_conflict_decision_yes_applies_fix_and_tracks_resolution" time="0.043" /><testcase classname="tests.test_timetable_insights" name="test_conflict_decision_no_keeps_conflict_open" time="0.034" /><testcase classname="tests.test_timetable_insights" name="test_conflict_analysis_flags_course_faculty_inconsistency" time="0.024" /><testcase classname="tests.test_timetable_insights" name="test_conflict_analysis_flags_room_type_working_hours_and_workload_overflow" time="0.024" /><testcase classname="tests.test_timetable_insights" name="test_conflict_resolve_all_fixes_room_type_conflict" time="0.027" /><testcase classname="tests.test_timetable_insights" name="test_conflict_review_supports_assistant_faculty_ids_in_payload" time="0.030" /><testcase classname="tests.test_timetable_offline_publish" name="test_publish_offline_filtered_and_all" time="0.017"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a746690&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x116f51550&gt;
+
+    def test_publish_offline_filtered_and_all(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin Publish",
+            "email": "offline-admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_one_payload = {
+            "name": "Faculty One",
+            "email": "offline-faculty-one@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        faculty_two_payload = {
+            "name": "Faculty Two",
+            "email": "offline-faculty-two@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_a_payload = {
+            "name": "Student A",
+            "email": "offline-student-a@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        student_b_payload = {
+            "name": "Student B",
+            "email": "offline-student-b@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "B",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_one_payload)
+
+tests/test_timetable_offline_publish.py:146: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a746690&gt;
+payload = {'department': 'CSE', 'email': 'offline-faculty-one@example.com', 'name': 'Faculty One', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_offline_publish.py:6: AssertionError</failure></testcase><testcase classname="tests.test_timetable_offline_publish" name="test_publish_offline_requires_admin_or_scheduler" time="0.008"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a747790&gt;
+
+    def test_publish_offline_requires_admin_or_scheduler(client):
+        student_payload = {
+            "name": "Student Unauthorized",
+            "email": "offline-unauthorized@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+&gt;       register_user(client, student_payload)
+
+tests/test_timetable_offline_publish.py:227: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a747790&gt;
+payload = {'department': 'CSE', 'email': 'offline-unauthorized@example.com', 'name': 'Student Unauthorized', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_timetable_offline_publish.py:6: AssertionError</failure></testcase><testcase classname="tests.test_timetable_offline_publish" name="test_official_publish_persists_when_notification_dispatch_fails" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a744160&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x10e7ff540&gt;
+
+    def test_official_publish_persists_when_notification_dispatch_fails(client, monkeypatch):
+        admin_payload = {
+            "name": "Admin Publish Robust",
+            "email": "official-publish-robust@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty Robust",
+            "email": "official-faculty@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        faculty_two_payload = {
+            "name": "Faculty Robust Two",
+            "email": "official-faculty-two@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_payload = {
+            "name": "Student Robust",
+            "email": "official-student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_timetable_offline_publish.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a744160&gt;
+payload = {'department': 'CSE', 'email': 'official-faculty@example.com', 'name': 'Faculty Robust', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_offline_publish.py:6: AssertionError</failure></testcase><testcase classname="tests.test_timetable_rbac" name="test_timetable_access_control" time="0.017"><failure message="assert 422 == 201&#10; +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x11a745ae0&gt;
+
+    def test_timetable_access_control(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "Computer Science",
+            "section_name": "A",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, student_payload)
+
+tests/test_timetable_rbac.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x11a745ae0&gt;
+payload = {'department': 'Computer Science', 'email': 'student@example.com', 'name': 'Student User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 422 == 201
+E        +  where 422 = &lt;Response [422 Unprocessable Entity]&gt;.status_code
+
+tests/test_timetable_rbac.py:3: AssertionError</failure></testcase><testcase classname="tests.test_timetable_rbac" name="test_official_timetable_is_scoped_for_student_and_faculty" time="0.017"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6df20&gt;
+
+    def test_official_timetable_is_scoped_for_student_and_faculty(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-scope@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty User",
+            "email": "faculty-scope@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_payload = {
+            "name": "Student User",
+            "email": "student-scope@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "A",
+        }
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_timetable_rbac.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6df20&gt;
+payload = {'department': 'CSE', 'email': 'faculty-scope@example.com', 'name': 'Faculty User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_rbac.py:3: AssertionError</failure></testcase><testcase classname="tests.test_timetable_rbac" name="test_published_timetable_is_isolated_per_temporary_teacher_and_student_accounts" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6ee00&gt;
+
+    def test_published_timetable_is_isolated_per_temporary_teacher_and_student_accounts(client):
+        admin_payload = {
+            "name": "Publish Admin",
+            "email": "admin-temp-scope@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_one_payload = {
+            "name": "Faculty Temp One",
+            "email": "faculty.temp.one+qa@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        faculty_two_payload = {
+            "name": "Faculty Temp Two",
+            "email": "faculty.temp.two+qa@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        student_a_payload = {
+            "name": "Student Temp A",
+            "email": "student.temp.a+qa@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "a",
+        }
+        student_b_payload = {
+            "name": "Student Temp B",
+            "email": "student.temp.b+qa@example.com",
+            "password": "password123",
+            "role": "student",
+            "department": "CSE",
+            "section_name": "B",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_one_payload)
+
+tests/test_timetable_rbac.py:256: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6ee00&gt;
+payload = {'department': 'CSE', 'email': 'faculty.temp.one+qa@example.com', 'name': 'Faculty Temp One', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_rbac.py:3: AssertionError</failure></testcase><testcase classname="tests.test_timetable_rbac" name="test_faculty_scope_and_mapping_include_assistant_assignments" time="0.019"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x112b6c380&gt;
+
+    def test_faculty_scope_and_mapping_include_assistant_assignments(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-assist-scope@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        primary_faculty_payload = {
+            "name": "Primary Faculty",
+            "email": "primary-assist-scope@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+        assistant_faculty_payload = {
+            "name": "Assistant Faculty",
+            "email": "assistant-assist-scope@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, primary_faculty_payload)
+
+tests/test_timetable_rbac.py:438: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x112b6c380&gt;
+payload = {'department': 'CSE', 'email': 'primary-assist-scope@example.com', 'name': 'Primary Faculty', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_rbac.py:3: AssertionError</failure></testcase><testcase classname="tests.test_timetable_validation" name="test_timetable_validation_rejects_bad_references" time="0.023" /><testcase classname="tests.test_timetable_validation" name="test_timetable_validation_rejects_primary_faculty_in_assistant_list" time="0.016"><failure message="assert 400 == 201&#10; +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x1135f3790&gt;
+
+    def test_timetable_validation_rejects_primary_faculty_in_assistant_list(client):
+        admin_payload = {
+            "name": "Admin User",
+            "email": "admin-assistant-validation@example.com",
+            "password": "password123",
+            "role": "admin",
+            "department": "Administration",
+        }
+        faculty_payload = {
+            "name": "Faculty User",
+            "email": "faculty-assistant-validation@example.com",
+            "password": "password123",
+            "role": "faculty",
+            "department": "CSE",
+        }
+    
+        register_user(client, admin_payload)
+&gt;       register_user(client, faculty_payload)
+
+tests/test_timetable_validation.py:72: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x1135f3790&gt;
+payload = {'department': 'CSE', 'email': 'faculty-assistant-validation@example.com', 'name': 'Faculty User', 'password': 'password123', ...}
+
+    def register_user(client, payload):
+        response = client.post("/api/auth/register", json=payload)
+&gt;       assert response.status_code == 201
+E       assert 400 == 201
+E        +  where 400 = &lt;Response [400 Bad Request]&gt;.status_code
+
+tests/test_timetable_validation.py:4: AssertionError</failure></testcase><testcase classname="tests.test_timetable_validation" name="test_mixed_ltp_keeps_lecture_single_and_practical_contiguous" time="0.032" /><testcase classname="tests.test_working_hours" name="test_working_hours_enforced_for_official_timetable" time="0.032" /></testsuite></testsuites>

@@ -311,10 +311,15 @@ def _conflict_resolution_priority(conflict: object) -> tuple[int, int, int, str]
         "section-overlap": 0,
         "faculty-overlap": 1,
         "room-overlap": 2,
-        "elective-overlap": 3,
-        "capacity": 4,
-        "availability": 5,
+        "room-type": 3,
+        "working-hours": 4,
+        "workload-overflow": 5,
         "course-faculty-inconsistency": 6,
+        "practical-block": 7,
+        "course-duration": 8,
+        "elective-overlap": 9,
+        "capacity": 10,
+        "availability": 11,
     }
     severity = str(getattr(conflict, "severity", "low") or "low").strip().lower()
     conflict_type = str(getattr(conflict, "type", "") or "").strip()
@@ -359,8 +364,6 @@ def _auto_resolve_generation_conflicts(
 
     resolution_log: list[AutoResolvedConflictEntry] = []
     for alternative in generation.alternatives:
-        original_hard_conflicts = alternative.hard_conflicts
-        resolved_any = False
         working_payload = OfficialTimetablePayload.model_validate(alternative.payload.model_dump(by_alias=True))
         max_rounds = min(120, max(20, len(working_payload.timetable_data) * 2))
         round_index = 0
@@ -420,7 +423,6 @@ def _auto_resolve_generation_conflicts(
             working_payload = best_candidate["payload"]
             visited_signatures.add(best_candidate["signature"])
             if best_candidate["conflict_resolved"]:
-                resolved_any = True
                 resolved_conflict = best_candidate["conflict"]
                 resolution_message = best_candidate["message"]
                 log_entry = AutoResolvedConflictEntry(
@@ -441,11 +443,8 @@ def _auto_resolve_generation_conflicts(
 
         final_conflicts = timetable_routes._build_conflicts(working_payload, db)
         alternative.payload = working_payload
-        detected_hard_conflicts = len(final_conflicts)
-        if resolved_any or detected_hard_conflicts > 0:
-            alternative.hard_conflicts = detected_hard_conflicts
-        else:
-            alternative.hard_conflicts = original_hard_conflicts
+        detected_conflict_count = len(final_conflicts)
+        alternative.hard_conflicts = detected_conflict_count
 
     unique_log = _dedupe_auto_resolved_conflicts(resolution_log, limit=200)
     generation.auto_resolved_conflicts = unique_log
@@ -496,6 +495,34 @@ def _run_generation_with_optional_progress(
         reserved_resource_slots=reserved_resource_slots,
         progress_reporter=progress_reporter,
     )
+
+
+def _reset_db_session_after_long_compute(db: Session) -> None:
+    """
+    Timetable generation can run for minutes without touching the DB.
+    Some Postgres setups (poolers / managed DBs) can drop idle connections, which then
+    surface as psycopg OperationalError during post-processing queries.
+    Closing the Session here forces a fresh checkout (engine pool_pre_ping) on next use.
+    """
+    try:
+        db.rollback()
+    except Exception:
+        # Best-effort cleanup; rollback can fail if the connection is already broken.
+        pass
+    try:
+        db.close()
+    except Exception:
+        pass
+
+
+def _reload_generation_user(db: Session, user_id: str) -> User:
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User session no longer valid for generation",
+        )
+    return user
 
 
 def _runtime_tuned_settings(settings: GenerationSettingsBase) -> GenerationSettingsBase:
@@ -1196,9 +1223,10 @@ def _generate_timetable_impl(
     progress_reporter: Callable[[dict], None] | None = None,
 ) -> GenerateTimetableResponse:
     started = perf_counter()
+    current_user_id = str(current_user.id)
     logger.info(
         "TIMETABLE GENERATION START | user_id=%s | program_id=%s | term=%s | alternatives=%s | persist=%s",
-        current_user.id,
+        current_user_id,
         payload.program_id,
         payload.term_number,
         payload.alternative_count,
@@ -1213,7 +1241,7 @@ def _generate_timetable_impl(
         program_min_hours_per_week = _load_program_faculty_min_hours(db, payload.program_id)
         logger.info(
             "TIMETABLE GENERATION STRATEGY | user_id=%s | program_id=%s | term=%s | requested_strategy=%s | effective=moea_sa_auto",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             payload.term_number,
             settings.solver_strategy,
@@ -1225,6 +1253,8 @@ def _generate_timetable_impl(
             payload=payload,
             progress_reporter=progress_reporter,
         )
+        _reset_db_session_after_long_compute(db)
+        current_user = _reload_generation_user(db, current_user_id)
         if progress_reporter is not None:
             progress_reporter(
                 {
@@ -1326,7 +1356,7 @@ def _generate_timetable_impl(
                         title="Timetable Updated",
                         message=f"Official timetable updated from generated result ({version_label}).",
                         notification_type=NotificationType.timetable,
-                        exclude_user_id=current_user.id,
+                        exclude_user_id=current_user_id,
                         deliver_email=False,
                         background_tasks=background_tasks,
                     )
@@ -1336,7 +1366,7 @@ def _generate_timetable_impl(
                     db.rollback()
                     logger.exception(
                         "TIMETABLE GENERATION PUBLISH NOTIFICATION FAILED | user_id=%s | program_id=%s | term=%s | version=%s",
-                        current_user.id,
+                        current_user_id,
                         payload.program_id,
                         payload.term_number,
                         version_label,
@@ -1347,7 +1377,7 @@ def _generate_timetable_impl(
                     result.publish_warning = publish_detail
                     logger.warning(
                         "TIMETABLE GENERATION PUBLISH SKIPPED | user_id=%s | program_id=%s | term=%s | reason=%s",
-                        current_user.id,
+                        current_user_id,
                         payload.program_id,
                         payload.term_number,
                         publish_detail,
@@ -1376,7 +1406,7 @@ def _generate_timetable_impl(
         elapsed_ms = int((perf_counter() - started) * 1000)
         logger.info(
             "TIMETABLE GENERATION COMPLETE | user_id=%s | program_id=%s | term=%s | alternatives=%s | best_hard_conflicts=%s | runtime_ms=%s | wall_ms=%s",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             payload.term_number,
             len(result.alternatives),
@@ -1389,7 +1419,7 @@ def _generate_timetable_impl(
         elapsed_ms = int((perf_counter() - started) * 1000)
         logger.exception(
             "TIMETABLE GENERATION FAILED | user_id=%s | program_id=%s | term=%s | wall_ms=%s",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             payload.term_number,
             elapsed_ms,
@@ -1406,9 +1436,10 @@ def _generate_timetable_cycle_impl(
     progress_reporter: Callable[[dict], None] | None = None,
 ) -> GenerateTimetableCycleResponse:
     started = perf_counter()
+    current_user_id = str(current_user.id)
     logger.info(
         "TIMETABLE CYCLE GENERATION START | user_id=%s | program_id=%s | cycle=%s | alternatives=%s | pareto_limit=%s | persist=%s",
-        current_user.id,
+        current_user_id,
         payload.program_id,
         payload.cycle,
         payload.alternative_count,
@@ -1424,7 +1455,7 @@ def _generate_timetable_cycle_impl(
         program_min_hours_per_week = _load_program_faculty_min_hours(db, payload.program_id)
         logger.info(
             "TIMETABLE CYCLE GENERATION STRATEGY | user_id=%s | program_id=%s | cycle=%s | requested_strategy=%s | effective=moea_sa_auto",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             payload.cycle,
             settings.solver_strategy,
@@ -1529,7 +1560,7 @@ def _generate_timetable_cycle_impl(
                     relaxed_reserved_mode = True
                     logger.warning(
                         "CYCLE TERM FALLBACK | user_id=%s | program_id=%s | term=%s | state_index=%s | reason=%s",
-                        current_user.id,
+                        current_user_id,
                         payload.program_id,
                         term_number,
                         state_index,
@@ -1545,6 +1576,9 @@ def _generate_timetable_cycle_impl(
                         reserved_resource_slots=[],
                         progress_reporter=_term_progress if progress_reporter is not None else None,
                     )
+                _reset_db_session_after_long_compute(db)
+                current_user = _reload_generation_user(db, current_user_id)
+                faculty_map = _load_faculty_map(db, program_id=payload.program_id)
                 run_label = _timestamped_generation_label(
                     prefix="cycle-run",
                     program_id=payload.program_id,
@@ -1782,7 +1816,7 @@ def _generate_timetable_cycle_impl(
                         f"Published Pareto solution #1. Official timetable currently points to term {term_numbers[-1]} ({latest_label})."
                     ),
                     notification_type=NotificationType.timetable,
-                    exclude_user_id=current_user.id,
+                    exclude_user_id=current_user_id,
                     deliver_email=False,
                     background_tasks=background_tasks,
                 )
@@ -1792,7 +1826,7 @@ def _generate_timetable_cycle_impl(
                 db.rollback()
                 logger.exception(
                     "TIMETABLE CYCLE PUBLISH NOTIFICATION FAILED | user_id=%s | program_id=%s | cycle=%s | terms=%s",
-                    current_user.id,
+                    current_user_id,
                     payload.program_id,
                     resolved_cycle,
                     ",".join(str(term) for term in term_numbers),
@@ -1843,7 +1877,7 @@ def _generate_timetable_cycle_impl(
         elapsed_ms = int((perf_counter() - started) * 1000)
         logger.info(
             "TIMETABLE CYCLE GENERATION COMPLETE | user_id=%s | program_id=%s | cycle=%s | terms=%s | pareto=%s | selected_rank=%s | combined_snapshot=%s | wall_ms=%s",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             resolved_cycle,
             ",".join(str(term) for term in term_numbers),
@@ -1880,7 +1914,7 @@ def _generate_timetable_cycle_impl(
         elapsed_ms = int((perf_counter() - started) * 1000)
         logger.exception(
             "TIMETABLE CYCLE GENERATION FAILED | user_id=%s | program_id=%s | cycle=%s | wall_ms=%s",
-            current_user.id,
+            current_user_id,
             payload.program_id,
             payload.cycle,
             elapsed_ms,
@@ -1965,14 +1999,15 @@ def _start_background_generation_job(
     owner_user: User,
     worker: Callable[[Session, User, Callable[[dict], None]], GenerateTimetableResponse | GenerateTimetableCycleResponse],
 ) -> GenerationJobAccepted:
-    created = generation_job_store.create_job(kind=kind, owner_user_id=owner_user.id)
+    owner_user_id = str(owner_user.id)
+    created = generation_job_store.create_job(kind=kind, owner_user_id=owner_user_id)
     job_id = created["job_id"]
 
     def _runner() -> None:
         db_session = SessionLocal()
         generation_job_store.mark_running(job_id)
         try:
-            refreshed_user = db_session.get(User, owner_user.id)
+            refreshed_user = db_session.get(User, owner_user_id)
             if refreshed_user is None:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,

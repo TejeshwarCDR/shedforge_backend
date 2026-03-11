@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Literal
 
-from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 DAY_VALUES = {
     "Monday",
@@ -42,7 +42,7 @@ class FacultyPayload(BaseModel):
     workloadHours: int = Field(ge=0, le=200)
     maxHours: int = Field(ge=0, le=200)
     availability: list[str] = Field(default_factory=list, max_length=14)
-    email: EmailStr
+    email: str
     currentWorkload: int | None = None
 
     @field_validator("availability")
@@ -291,8 +291,8 @@ class OfflinePublishResponse(BaseModel):
     sent: int
     skipped: int
     failed: int
-    recipients: list[EmailStr] = Field(default_factory=list)
-    failed_recipients: list[EmailStr] = Field(default_factory=list)
+    recipients: list[str] = Field(default_factory=list)
+    failed_recipients: list[str] = Field(default_factory=list)
     message: str
 
 
@@ -318,6 +318,6 @@ class FacultyCourseSectionAssignment(BaseModel):
 class FacultyCourseSectionMappingOut(BaseModel):
     faculty_id: str = Field(min_length=1, max_length=36)
     faculty_name: str = Field(min_length=1, max_length=200)
-    faculty_email: EmailStr
+    faculty_email: str
     total_assigned_hours: float = Field(ge=0.0, le=500.0)
     assignments: list[FacultyCourseSectionAssignment] = Field(default_factory=list)
